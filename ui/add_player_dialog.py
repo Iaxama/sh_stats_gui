@@ -90,6 +90,9 @@ class AddPlayerDialog(QDialog):
         dlg = CropDialog(path, self)
         if not dlg.exec():
             return
+        # discard any prior upload made in this session
+        if self._avatar_src:
+            storage.delete_avatar(self._avatar_src)
         # copy original to assets immediately so params stay valid
         rel_path = storage.copy_avatar(path)
         self._avatar_src = rel_path
@@ -122,8 +125,11 @@ class AddPlayerDialog(QDialog):
                 if p.id == self._player.id:
                     p.name = name
                     if self._avatar_src:
+                        old_path = p.avatar_path
                         p.avatar_path = self._avatar_src
                         p.avatar_crop = self._avatar_crop
+                        if old_path and old_path != self._avatar_src:
+                            storage.delete_avatar(old_path)
                     break
 
         storage.save_players(players)

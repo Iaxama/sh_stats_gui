@@ -60,3 +60,11 @@ def copy_avatar(src_path: str) -> str:
 
 def resolve_avatar(relative_path: str) -> str:
     return os.path.join(_BASE, relative_path)
+
+
+def delete_avatar(relative_path: str) -> None:
+    """Remove an avatar file from disk; silently ignores missing files."""
+    try:
+        os.remove(resolve_avatar(relative_path))
+    except FileNotFoundError:
+        pass
