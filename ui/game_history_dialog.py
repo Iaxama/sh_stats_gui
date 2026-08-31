@@ -11,7 +11,7 @@ from PyQt6.QtGui import QFont, QPixmap
 import storage
 from models.game import Game
 from models.player import Player
-from ui.avatar import make_circular_pixmap
+from ui.player_tooltip import PlayerWidget
 from ui.theme import GOLD, TEXT, TEXT_DIM, RED, RED_HOVER, CARD, BORDER, SURFACE, BG
 
 
@@ -133,8 +133,6 @@ class GameCard(QFrame):
         for pr in game.players:
             player = players.get(pr.player_id)
             name = player.name if player else "Unknown"
-            avatar_path = storage.resolve_avatar(player.avatar_path) \
-                if (player and player.avatar_path) else None
 
             chip = QFrame()
             chip.setStyleSheet(
@@ -146,10 +144,15 @@ class GameCard(QFrame):
             chip_layout.setSpacing(3)
             chip_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-            av_lbl = QLabel()
-            av_lbl.setPixmap(make_circular_pixmap(avatar_path, 40))
-            av_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            av_lbl.setStyleSheet("background: transparent; border: none;")
+            if player:
+                pw = PlayerWidget(player, avatar_size=40, show_name=False)
+                pw.setStyleSheet("background: transparent; border: none;")
+                chip_layout.addWidget(pw, alignment=Qt.AlignmentFlag.AlignCenter)
+            else:
+                av_lbl = QLabel()
+                av_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                av_lbl.setStyleSheet("background: transparent; border: none;")
+                chip_layout.addWidget(av_lbl)
 
             name_lbl = QLabel(name)
             name_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -167,9 +170,9 @@ class GameCard(QFrame):
 
             extras = []
             if pr.died:
-                extras.append("† died")
+                extras.append("\u2020 died")
             if extras:
-                extra_lbl = QLabel(" · ".join(extras))
+                extra_lbl = QLabel(" \u00b7 ".join(extras))
                 extra_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 extra_lbl.setStyleSheet(
                     f"color: {TEXT_DIM}; font-size: 10px; font-style: italic;"
@@ -177,7 +180,6 @@ class GameCard(QFrame):
                 )
                 chip_layout.addWidget(extra_lbl)
 
-            chip_layout.addWidget(av_lbl)
             chip_layout.addWidget(name_lbl)
             chip_layout.addWidget(role_lbl)
             chips_row.addWidget(chip)

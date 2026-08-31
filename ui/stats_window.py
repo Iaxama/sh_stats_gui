@@ -6,11 +6,11 @@ from PyQt6.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView,
     QFrame, QPushButton, QSizePolicy,
 )
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QPixmap
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 
 import storage
-from ui.avatar import make_circular_pixmap
+from ui.player_tooltip import PlayerWidget
 from ui.theme import GOLD, TEXT, TEXT_DIM, RED, SURFACE, CARD, BORDER
 
 
@@ -157,30 +157,12 @@ class StatsWindow(QDialog):
             player = players.get(pid)
             name = player.name if player else f"<unknown:{pid[:6]}>"
 
-            # Avatar + name cell
-            cell_widget = QHBoxLayout()
-            cell_widget.setContentsMargins(4, 2, 4, 2)
-            cell_widget.setSpacing(8)
-
-            avatar_path = storage.resolve_avatar(player.avatar_path) if (player and player.avatar_path) else None
-            px = make_circular_pixmap(avatar_path, AVATAR_SIZE)
-            av_lbl = QLabel()
-            av_lbl.setPixmap(px)
-            av_lbl.setFixedSize(QSize(AVATAR_SIZE, AVATAR_SIZE))
-
-            name_lbl = QLabel(name)
-            name_lbl.setStyleSheet(f"color: {TEXT}; background: transparent;")
-
-            cell_widget.addWidget(av_lbl)
-            cell_widget.addWidget(name_lbl)
-            cell_widget.addStretch()
-
-            container = QFrame()
-            container.setLayout(cell_widget)
-            container.setStyleSheet("background: transparent; border: none;")
-            # set item first so sorting works; widget overlays it for display
             self._table.setItem(row, 0, _SortItem("", name))
-            self._table.setCellWidget(row, 0, container)
+            if player:
+                self._table.setCellWidget(row, 0, PlayerWidget(player, avatar_size=AVATAR_SIZE))
+            else:
+                from PyQt6.QtWidgets import QLabel as _QL
+                self._table.setCellWidget(row, 0, _QL(name))
 
             numeric = [
                 s["played"], s["liberal"], s["fascist"], s["hitler"],

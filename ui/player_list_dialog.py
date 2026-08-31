@@ -7,6 +7,7 @@ from PyQt6.QtGui import QFont
 
 import storage
 from ui.avatar import avatar_label
+from ui.player_tooltip import PlayerWidget
 from ui.theme import GOLD, TEXT_DIM, BORDER, SURFACE
 
 
@@ -76,14 +77,8 @@ class PlayerListDialog(QDialog):
         row.setContentsMargins(10, 6, 10, 6)
         row.setSpacing(12)
 
-        avatar_path = storage.resolve_avatar(player.avatar_path) if player.avatar_path else None
-        av = avatar_label(avatar_path, 44, getattr(player, "avatar_crop", None))
-        row.addWidget(av)
-
-        name_lbl = QLabel(player.name)
-        name_lbl.setFont(QFont("Georgia", 12, QFont.Weight.Bold))
-        name_lbl.setStyleSheet(f"color: {GOLD}; background: transparent; border: none;")
-        row.addWidget(name_lbl, 1)
+        pw = PlayerWidget(player, avatar_size=44)
+        row.addWidget(pw, 1)
 
         edit_btn = QPushButton("✎  Edit")
         edit_btn.setMinimumWidth(90)

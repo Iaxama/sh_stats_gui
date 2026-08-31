@@ -13,7 +13,7 @@ from PyQt6.QtGui import QFont
 import storage
 from models.player import Player
 from models.game import Game, PlayerResult
-from ui.avatar import avatar_label
+from ui.player_tooltip import PlayerWidget
 from ui.theme import GOLD, TEXT, CARD, BORDER, RED, SURFACE, TEXT_DIM, BG
 
 
@@ -38,19 +38,10 @@ class PlayerCard(QWidget):
         root.setSpacing(4)
         root.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        # Avatar
-        avatar_path = storage.resolve_avatar(player.avatar_path) if player.avatar_path else None
-        av = avatar_label(avatar_path, 72)
-        av.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        root.addWidget(av, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        # Name
-        name_lbl = QLabel(player.name)
-        name_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        name_lbl.setWordWrap(True)
-        name_lbl.setFont(QFont("Georgia", 11, QFont.Weight.Bold))
-        name_lbl.setStyleSheet(f"color: {GOLD}; background: transparent; border: none;")
-        root.addWidget(name_lbl)
+        pw = PlayerWidget(player, avatar_size=72)
+        pw.setStyleSheet("background: transparent; border: none;")
+        pw.layout().setAlignment(Qt.AlignmentFlag.AlignCenter)
+        root.addWidget(pw, alignment=Qt.AlignmentFlag.AlignCenter)
 
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
@@ -264,36 +255,36 @@ class AddGameDialog(QDialog):
         playing = [(c, c.selected_role()) for c in self._cards if c.is_playing()]
 
         if len(playing) < 2:
-            self._set_error("At least 2 players must be marked as playing.")
+            self._error_lbl.setText("At least 2 players must be marked as playing.")
             return
 
         no_role = [c.player.name for c, r in playing if r is None]
         if no_role:
-            self._set_error(f"Missing role for: {', '.join(no_role)}")
+            self._error_lbl.setText(f"Missing role for: {', '.join(no_role)}")
             return
 
         hitlers = [c for c, r in playing if r == "hitler"]
         if len(hitlers) != 1:
-            self._set_error("Exactly one player must be assigned the Hitler role.")
+            self._error_lbl.setText("Exactly one player must be assigned the Hitler role.")
             return
 
         # floor((n-1)/2) - 1 fascists (not counting Hitler); min 5 players
         n = len(playing)
         if n < 5:
-            self._set_error(f"Invalid player count ({n}). Secret Hitler requires at least 5 players.")
+            self._error_lbl.setText(f"Invalid player count ({n}). Secret Hitler requires at least 5 players.")
             return
         expected_fascists = (n - 1) // 2 - 1
         expected_liberals = n - expected_fascists - 1
         fascist_count = sum(1 for _, r in playing if r == "fascist")
         liberal_count = sum(1 for _, r in playing if r == "liberal")
         if fascist_count != expected_fascists:
-            self._set_error(
+            self._error_lbl.setText(
                 f"With {n} players, there must be exactly {expected_fascists} Fascist(s) "
                 f"(+ Hitler). Got {fascist_count}."
             )
             return
         if liberal_count != expected_liberals:
-            self._set_error(
+            self._error_lbl.setText(
                 f"With {n} players, there must be exactly {expected_liberals} Liberal(s). Got {liberal_count}."
             )
             return
@@ -303,7 +294,7 @@ class AddGameDialog(QDialog):
             "fascist" if self._rb_fascist.isChecked() else None
         )
         if winning_team is None:
-            self._set_error("Select a winning team.")
+            self._error_lbl.setText("Select a winning team.")
             return
 
         winning_condition = (
@@ -312,7 +303,7 @@ class AddGameDialog(QDialog):
             "hitler_executed"  if self._rb_executed.isChecked() else None
         )
         if winning_condition is None:
-            self._set_error("Select a winning condition.")
+            self._error_lbl.setText("Select a winning condition.")
             return
 
         results = [
