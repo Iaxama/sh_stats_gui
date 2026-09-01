@@ -6,3 +6,6 @@ venv/
 .venv/
 assets/avatars/*
 data/*
+.github-sync-config
+.git-sync-env
+data/*.lock

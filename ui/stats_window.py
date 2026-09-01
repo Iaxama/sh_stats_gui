@@ -148,7 +148,7 @@ class StatsWindow(QDialog):
                 else:
                     s["losses"] += 1
 
-        AVATAR_SIZE = 36
+        AVATAR_SIZE = 100
         self._table.setSortingEnabled(False)  # disable while populating to avoid mid-fill reorders
         self._table.setRowCount(len(stats))
         self._table.verticalHeader().setDefaultSectionSize(AVATAR_SIZE + 8)

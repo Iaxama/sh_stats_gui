@@ -116,7 +116,7 @@ export default function Stats() {
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <PlayerHover player={r.player} games={games}>
-                      <Avatar path={r.player.avatar_path} name={r.player.name} size={28} />
+                      <Avatar path={r.player.avatar_path} name={r.player.name} size={100} />
                       {r.player.name}
                     </PlayerHover>
                   </div>
