@@ -255,36 +255,36 @@ class AddGameDialog(QDialog):
         playing = [(c, c.selected_role()) for c in self._cards if c.is_playing()]
 
         if len(playing) < 2:
-            self._error_lbl.setText("At least 2 players must be marked as playing.")
+            self._set_error("At least 2 players must be marked as playing.")
             return
 
         no_role = [c.player.name for c, r in playing if r is None]
         if no_role:
-            self._error_lbl.setText(f"Missing role for: {', '.join(no_role)}")
+            self._set_error(f"Missing role for: {', '.join(no_role)}")
             return
 
         hitlers = [c for c, r in playing if r == "hitler"]
         if len(hitlers) != 1:
-            self._error_lbl.setText("Exactly one player must be assigned the Hitler role.")
+            self._set_error("Exactly one player must be assigned the Hitler role.")
             return
 
         # floor((n-1)/2) - 1 fascists (not counting Hitler); min 5 players
         n = len(playing)
         if n < 5:
-            self._error_lbl.setText(f"Invalid player count ({n}). Secret Hitler requires at least 5 players.")
+            self._set_error(f"Invalid player count ({n}). Secret Hitler requires at least 5 players.")
             return
         expected_fascists = (n - 1) // 2 - 1
         expected_liberals = n - expected_fascists - 1
         fascist_count = sum(1 for _, r in playing if r == "fascist")
         liberal_count = sum(1 for _, r in playing if r == "liberal")
         if fascist_count != expected_fascists:
-            self._error_lbl.setText(
+            self._set_error(
                 f"With {n} players, there must be exactly {expected_fascists} Fascist(s) "
                 f"(+ Hitler). Got {fascist_count}."
             )
             return
         if liberal_count != expected_liberals:
-            self._error_lbl.setText(
+            self._set_error(
                 f"With {n} players, there must be exactly {expected_liberals} Liberal(s). Got {liberal_count}."
             )
             return
@@ -294,7 +294,7 @@ class AddGameDialog(QDialog):
             "fascist" if self._rb_fascist.isChecked() else None
         )
         if winning_team is None:
-            self._error_lbl.setText("Select a winning team.")
+            self._set_error("Select a winning team.")
             return
 
         winning_condition = (
@@ -303,7 +303,7 @@ class AddGameDialog(QDialog):
             "hitler_executed"  if self._rb_executed.isChecked() else None
         )
         if winning_condition is None:
-            self._error_lbl.setText("Select a winning condition.")
+            self._set_error("Select a winning condition.")
             return
 
         results = [
