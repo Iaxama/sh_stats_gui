@@ -3,17 +3,13 @@ import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from PyQt6.QtWidgets import QApplication
-from ui.theme import apply_theme
-from ui.main_window import MainWindow
+from backend.app import create_app
 
 
 def main():
-    app = QApplication(sys.argv)
-    apply_theme(app)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    app = create_app()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
 
 
 if __name__ == "__main__":

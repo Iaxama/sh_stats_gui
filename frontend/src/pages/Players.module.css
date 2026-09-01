@@ -1,0 +1,6 @@
+.page { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.list { display: flex; flex-direction: column; gap: 0.6rem; }
+.row { display: flex; align-items: center; gap: 0.9rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 1rem; }
+.name { flex: 1; font-size: 1.05rem; }
+.actions { display: flex; gap: 0.5rem; }

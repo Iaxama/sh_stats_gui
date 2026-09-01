@@ -1,0 +1,12 @@
+.page { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+.overallGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.8rem; margin: 1.5rem 0 2rem; }
+.statBox { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 0.8rem; text-align: center; display: flex; flex-direction: column; gap: 0.3rem; }
+.statVal { font-size: 2rem; color: var(--gold); font-weight: bold; }
+.statLabel { font-size: 0.8rem; color: var(--text-dim); }
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th { background: var(--surface2); color: var(--text-dim); text-align: left; padding: 0.5rem 0.6rem; cursor: pointer; white-space: nowrap; border-bottom: 1px solid var(--border); user-select: none; }
+.table th.sorted { color: var(--gold); }
+.table th:hover { color: var(--gold); }
+.table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.table tr:hover td { background: var(--surface); }

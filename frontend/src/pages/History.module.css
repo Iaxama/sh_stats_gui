@@ -1,0 +1,18 @@
+.page { max-width: 700px; margin: 0 auto; padding: 2rem 1rem; }
+.list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.2rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.cardHeader { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1rem; cursor: pointer; user-select: none; }
+.cardHeader:hover { background: var(--surface2); }
+.date { color: var(--text-dim); font-size: 0.9rem; min-width: 100px; }
+.team { font-weight: bold; }
+.liberal { color: var(--liberal); }
+.fascist { color: var(--fascist); }
+.cond { flex: 1; font-size: 0.88rem; color: var(--text-dim); }
+.chevron { color: var(--text-dim); }
+.cardBody { border-top: 1px solid var(--border); padding: 0.8rem 1rem; }
+.playerList { display: flex; flex-direction: column; gap: 0.4rem; }
+.playerRow { display: flex; align-items: center; gap: 0.6rem; }
+.pname { flex: 1; }
+.role { font-size: 0.85rem; text-transform: capitalize; }
+.died { color: #888; font-size: 0.9rem; }
+.cardFooter { margin-top: 0.8rem; display: flex; justify-content: flex-end; }

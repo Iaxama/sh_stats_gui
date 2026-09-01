@@ -1,0 +1,38 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 2.5rem;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2.4rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  width: min(480px, 100%);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--red);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 1.4rem;
+  font-size: 1.05rem;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s;
+  min-height: 80px;
+}
+.card:hover { background: var(--red-dark); }

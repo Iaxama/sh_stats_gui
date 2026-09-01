@@ -1,0 +1,12 @@
+.page { max-width: 700px; margin: 0 auto; padding: 2rem 1rem; }
+.section { margin-bottom: 2rem; }
+.section h2 { margin-bottom: 0.9rem; font-size: 1.1rem; }
+.playerGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.6rem; }
+.playerCard { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.playerCard.active { border-color: var(--gold); }
+.playerHeader { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; cursor: pointer; user-select: none; }
+.playerHeader span { flex: 1; font-size: 0.95rem; }
+.playerControls { padding: 0.5rem 0.8rem 0.7rem; border-top: 1px solid var(--border); display: flex; gap: 0.8rem; align-items: center; }
+.diedLabel { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--text-dim); cursor: pointer; white-space: nowrap; width: auto; }
+.diedLabel input { width: auto; }
+.resultRow { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
