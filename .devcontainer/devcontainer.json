@@ -1,4 +1,6 @@
 {
   "name": "sh_stats_gui",
-  "image": "ubuntu:24.04"
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/sh_stats_gui"
 }

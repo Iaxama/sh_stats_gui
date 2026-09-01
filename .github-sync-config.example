@@ -17,18 +17,18 @@
 
 # Option 2: HTTPS with Personal Access Token (PAT)
 # Uncomment the lines below and comment out SSH above
-export GIT_DATA_REPO_URL=your_repo_here
-export GIT_GITHUB_TOKEN=your_token_here
+GIT_DATA_REPO_URL=your_repo_here
+GIT_GITHUB_TOKEN=your_token_here
 
 # ============================================================
 # REQUIRED: Git Author Information
 # ============================================================
 
 # Git commit author name
-export GIT_AUTHOR_NAME="Data Sync"
+GIT_AUTHOR_NAME="Data Sync"
 
 # Git commit author email
-export GIT_AUTHOR_EMAIL=sync@example.com
+GIT_AUTHOR_EMAIL=sync@example.com
 
 # ============================================================
 # OPTIONAL: Debugging
