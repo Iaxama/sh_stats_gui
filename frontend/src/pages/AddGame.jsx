@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPlayers, createGame } from '../api';
+import { getGames, getPlayers, createGame } from '../api';
 import Avatar from '../components/Avatar';
+import PlayerHover from '../components/PlayerHover';
 import styles from './AddGame.module.css';
 
 const ROLES = ['liberal', 'fascist', 'hitler'];
@@ -19,28 +20,41 @@ const WIN_CONDITIONS = {
 export default function AddGame() {
   const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
+  const [games, setGames] = useState([]);
   const [selected, setSelected] = useState([]);
   const [winningTeam, setWinningTeam] = useState('liberal');
   const [winningCondition, setWinningCondition] = useState('policies_enacted');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => { getPlayers().then(setPlayers); }, []);
+  useEffect(() => {
+    Promise.all([getPlayers(), getGames()]).then(([loadedPlayers, loadedGames]) => {
+      setPlayers(loadedPlayers);
+      setGames(loadedGames);
+    });
+  }, []);
 
   // reset condition when team changes
   useEffect(() => {
     setWinningCondition(WIN_CONDITIONS[winningTeam][0].value);
   }, [winningTeam]);
 
-  function togglePlayer(id) {
+  function setRole(id, role) {
     setSelected(sel => {
-      if (sel.find(s => s.player_id === id)) return sel.filter(s => s.player_id !== id);
-      return [...sel, { player_id: id, role: 'liberal', died: false }];
+      const existing = sel.find(s => s.player_id === id);
+      if (existing) {
+        // Player already selected, update their role
+        return sel.map(s => s.player_id === id ? { ...s, role } : s);
+      } else {
+        // Player not selected, add them with this role
+        return [...sel, { player_id: id, role, died: false }];
+      }
     });
   }
 
-  function setRole(id, role) {
-    setSelected(sel => sel.map(s => s.player_id === id ? { ...s, role } : s));
+  function clearRole(id) {
+    // Remove player from selected when role is cleared
+    setSelected(sel => sel.filter(s => s.player_id !== id));
   }
 
   function setDied(id, died) {
@@ -49,9 +63,23 @@ export default function AddGame() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (selected.length < 5) { setError('Select at least 5 players.'); return; }
+    const n = selected.length;
+    if (n < 5) { setError('Select at least 5 players.'); return; }
     const hitlers = selected.filter(s => s.role === 'hitler');
     if (hitlers.length !== 1) { setError('Exactly one Hitler required.'); return; }
+    // floor((n-1)/2) - 1 fascists (not counting Hitler)
+    const expectedFascists = Math.floor((n - 1) / 2) - 1;
+    const expectedLiberals = n - expectedFascists - 1;
+    const fascistCount = selected.filter(s => s.role === 'fascist').length;
+    const liberalCount = selected.filter(s => s.role === 'liberal').length;
+    if (fascistCount !== expectedFascists) {
+      setError(`With ${n} players, there must be exactly ${expectedFascists} Fascist(s) (+ Hitler). Got ${fascistCount}.`);
+      return;
+    }
+    if (liberalCount !== expectedLiberals) {
+      setError(`With ${n} players, there must be exactly ${expectedLiberals} Liberal(s). Got ${liberalCount}.`);
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -77,22 +105,44 @@ export default function AddGame() {
               const active = !!entry;
               return (
                 <div key={p.id} className={`${styles.playerCard} ${active ? styles.active : ''}`}>
-                  <div className={styles.playerHeader} onClick={() => togglePlayer(p.id)}>
-                    <Avatar path={p.avatar_path} name={p.name} size={36} />
-                    <span>{p.name}</span>
-                    <input type="checkbox" checked={active} readOnly />
+                  <div className={styles.playerHeader}>
+                    <PlayerHover player={p} games={games}>
+                      <span>{p.name}</span>
+                      <Avatar path={p.avatar_path} name={p.name} size={150} />
+                    </PlayerHover>
                   </div>
-                  {active && (
-                    <div className={styles.playerControls}>
-                      <select value={entry.role} onChange={e => setRole(p.id, e.target.value)}>
-                        {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                      </select>
-                      <label className={styles.diedLabel}>
-                        <input type="checkbox" checked={entry.died} onChange={e => setDied(p.id, e.target.checked)} />
-                        Died
-                      </label>
+                  <div className={styles.playerControls}>
+                    <div className={styles.roleButtons}>
+                      <button 
+                        type="button"
+                        className={`${styles.roleBtn} ${entry?.role === 'liberal' ? styles.roleActive : ''}`}
+                        style={entry?.role === 'liberal' ? { backgroundColor: '#3b82f6', color: 'white' } : {}}
+                        onClick={() => setRole(p.id, 'liberal')}
+                      >
+                        Liberal
+                      </button>
+                      <button 
+                        type="button"
+                        className={`${styles.roleBtn} ${entry?.role === 'fascist' ? styles.roleActive : ''}`}
+                        style={entry?.role === 'fascist' ? { backgroundColor: '#ef4444', color: 'white' } : {}}
+                        onClick={() => setRole(p.id, 'fascist')}
+                      >
+                        Fascist
+                      </button>
+                      <button 
+                        type="button"
+                        className={`${styles.roleBtn} ${entry?.role === 'hitler' ? styles.roleActive : ''}`}
+                        style={entry?.role === 'hitler' ? { backgroundColor: '#8b0000', color: 'white' } : {}}
+                        onClick={() => setRole(p.id, 'hitler')}
+                      >
+                        Hitler
+                      </button>
                     </div>
-                  )}
+                    <label className={styles.diedLabel}>
+                      <input type="checkbox" checked={entry?.died || false} onChange={e => setDied(p.id, e.target.checked)} />
+                      Died
+                    </label>
+                  </div>
                 </div>
               );
             })}

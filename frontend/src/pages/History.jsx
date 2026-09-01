@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { getGames, getPlayers, deleteGame } from '../api';
 import Avatar from '../components/Avatar';
+import PlayerHover from '../components/PlayerHover';
 import styles from './History.module.css';
 
 function roleClass(role) {
   return role === 'hitler' ? 'role-hitler' : role === 'fascist' ? 'role-fascist' : 'role-liberal';
 }
 
-function GameCard({ game, playerMap, onDelete }) {
+function GameCard({ game, games, playerMap, onDelete }) {
   const [open, setOpen] = useState(false);
   const date = new Date(game.date).toLocaleDateString(undefined, { dateStyle: 'medium' });
   const teamLabel = game.winning_team === 'liberal' ? 'Liberal' : 'Fascist';
@@ -33,11 +34,17 @@ function GameCard({ game, playerMap, onDelete }) {
             {game.players.map(pr => {
               const p = playerMap[pr.player_id];
               return (
-                <div key={pr.player_id} className={styles.playerRow}>
-                  <Avatar path={p?.avatar_path} name={p?.name ?? '?'} size={32} />
-                  <span className={styles.pname}>{p?.name ?? 'Unknown'}</span>
-                  <span className={`${styles.role} ${roleClass(pr.role)}`}>{pr.role}</span>
-                  {pr.died && <span className={styles.died}>✝</span>}
+                <div key={pr.player_id} className={`${styles.playerCard} ${styles[roleClass(pr.role)]}`}>
+                  <div className={styles.playerIdentity}>
+                    {p ? <PlayerHover player={p} games={games}>
+                      <Avatar path={p.avatar_path} name={p.name} size={32} />
+                      <span className={styles.pname}>{p.name}</span>
+                    </PlayerHover> : <>
+                      <Avatar path={undefined} name="?" size={32} />
+                      <span className={styles.pname}>Unknown</span>
+                    </>}
+                  </div>
+                  {pr.died && <span className={styles.died} aria-label="Dead" title="Dead">✕</span>}
                 </div>
               );
             })}
@@ -75,7 +82,7 @@ export default function History() {
       {games.length === 0 && <p style={{ color: 'var(--text-dim)', marginTop: '1rem' }}>No games recorded yet.</p>}
       <div className={styles.list}>
         {games.map(g => (
-          <GameCard key={g.id} game={g} playerMap={playerMap} onDelete={handleDelete} />
+          <GameCard key={g.id} game={g} games={games} playerMap={playerMap} onDelete={handleDelete} />
         ))}
       </div>
     </div>

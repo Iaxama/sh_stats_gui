@@ -11,7 +11,11 @@ const NAV = [
 export default function Home() {
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Secret Hitler Stats</h1>
+      <img
+        className={styles.logo}
+        src="/secret-hitler-logo.svg"
+        alt="Secret Hitler Stats"
+      />
       <div className={styles.grid}>
         {NAV.map(({ to, label }) => (
           <Link key={to} to={to} className={styles.card}>{label}</Link>

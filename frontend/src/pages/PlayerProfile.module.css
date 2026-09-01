@@ -1,0 +1,13 @@
+.page { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; text-align: left; }
+.back { color: var(--gold); }
+.profile { margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2rem; text-align: center; }
+.avatarButton { padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: zoom-in; }
+.avatarButton:disabled { cursor: default; }
+.avatarButton img { display: block; }
+.profile h1 { font-size: 2rem; color: var(--gold); margin: 1rem 0 1.5rem; }
+.stats { border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(2, 1fr); }
+.stat { padding: 1rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.stat strong { color: var(--gold); font-size: 1.35rem; }
+.stat span { color: var(--text-dim); font-size: 0.85rem; }
+.lightbox { position: fixed; inset: 0; z-index: 1100; background: rgba(0, 0, 0, 0.8); display: grid; place-items: center; padding: 2rem; cursor: zoom-out; }
+.lightbox img { max-width: min(90vw, 900px); max-height: 90vh; object-fit: contain; cursor: default; }

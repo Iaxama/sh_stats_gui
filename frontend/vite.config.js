@@ -7,8 +7,8 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      '/api': 'http://localhost:5000',
-      '/avatars': 'http://localhost:5000',
+      '/api': 'http://127.0.0.1:5001',
+      '/avatars': 'http://127.0.0.1:5001',
     },
   },
   build: { outDir: 'dist' },

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getPlayers, createPlayer, updatePlayer, deletePlayer } from '../api';
+import { getGames, getPlayers, createPlayer, updatePlayer, deletePlayer } from '../api';
 import Avatar from '../components/Avatar';
 import AvatarCrop from '../components/AvatarCrop';
+import PlayerHover from '../components/PlayerHover';
 import styles from './Players.module.css';
 
 function PlayerModal({ player, onClose, onSaved }) {
@@ -70,10 +71,13 @@ function PlayerModal({ player, onClose, onSaved }) {
 
 export default function Players() {
   const [players, setPlayers] = useState([]);
+  const [games, setGames] = useState([]);
   const [modal, setModal] = useState(null); // null | 'add' | player-obj
 
   async function load() {
-    setPlayers(await getPlayers());
+    const [loadedPlayers, loadedGames] = await Promise.all([getPlayers(), getGames()]);
+    setPlayers(loadedPlayers);
+    setGames(loadedGames);
   }
 
   useEffect(() => { load(); }, []);
@@ -107,8 +111,10 @@ export default function Players() {
         {players.length === 0 && <p style={{ color: 'var(--text-dim)' }}>No players yet.</p>}
         {players.map(p => (
           <div key={p.id} className={styles.row}>
-            <Avatar path={p.avatar_path} name={p.name} size={44} />
-            <span className={styles.name}>{p.name}</span>
+            <PlayerHover player={p} games={games}>
+              <Avatar path={p.avatar_path} name={p.name} size={150} />
+              <span className={styles.name}>{p.name}</span>
+            </PlayerHover>
             <div className={styles.actions}>
               <button className="btn-secondary" onClick={() => setModal(p)}>Edit</button>
               <button className="btn-danger" onClick={() => handleDelete(p.id)}>Delete</button>

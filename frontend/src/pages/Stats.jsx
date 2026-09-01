@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getGames, getPlayers } from '../api';
 import Avatar from '../components/Avatar';
+import PlayerHover from '../components/PlayerHover';
 import styles from './Stats.module.css';
 
 function computeStats(games, players) {
@@ -114,8 +115,10 @@ export default function Stats() {
               <tr key={r.player.id}>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Avatar path={r.player.avatar_path} name={r.player.name} size={28} />
-                    {r.player.name}
+                    <PlayerHover player={r.player} games={games}>
+                      <Avatar path={r.player.avatar_path} name={r.player.name} size={28} />
+                      {r.player.name}
+                    </PlayerHover>
                   </div>
                 </td>
                 <td>{r.games}</td>

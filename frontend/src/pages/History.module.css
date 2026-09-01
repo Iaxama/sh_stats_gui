@@ -1,4 +1,4 @@
-.page { max-width: 700px; margin: 0 auto; padding: 2rem 1rem; }
+.page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
 .list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.2rem; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .cardHeader { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1rem; cursor: pointer; user-select: none; }
@@ -10,9 +10,12 @@
 .cond { flex: 1; font-size: 0.88rem; color: var(--text-dim); }
 .chevron { color: var(--text-dim); }
 .cardBody { border-top: 1px solid var(--border); padding: 0.8rem 1rem; }
-.playerList { display: flex; flex-direction: column; gap: 0.4rem; }
-.playerRow { display: flex; align-items: center; gap: 0.6rem; }
-.pname { flex: 1; }
-.role { font-size: 0.85rem; text-transform: capitalize; }
-.died { color: #888; font-size: 0.9rem; }
+.playerList { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.2rem; }
+.playerCard { position: relative; display: flex; flex: 0 0 80px; justify-content: center; min-width: 0; padding: 0.55rem 0.6rem; border-radius: 5px; color: white; }
+.role-liberal { background: #2563eb; }
+.role-fascist { background: #dc2626; }
+.role-hitler { background: #7f1d1d; }
+.playerIdentity { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.pname { display: block; max-width: 100%; margin-top: 0.3rem; overflow: hidden; font-size: 0.75rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.died { position: absolute; top: 0.2rem; right: 0.25rem; color: #ff1f1f; font-size: 1.35rem; font-weight: bold; line-height: 1; text-shadow: 0 0 2px #fff; }
 .cardFooter { margin-top: 0.8rem; display: flex; justify-content: flex-end; }
