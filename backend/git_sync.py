@@ -196,12 +196,38 @@ class GitSync:
 
         try:
             origin = self.repo.remote("origin")
-            origin.pull(allow_unrelated_histories=True)
-            logger.info("Successfully cloned/pulled from remote")
+            origin.fetch()
+
+            default_branch = None
+            try:
+                remote_head = self.repo.git.symbolic_ref(
+                    "refs/remotes/origin/HEAD"
+                )
+                default_branch = remote_head.removeprefix("refs/remotes/origin/")
+            except GitCommandError:
+                pass
+
+            if not default_branch:
+                for branch_name in ("main", "master"):
+                    if f"origin/{branch_name}" in self.repo.refs:
+                        default_branch = branch_name
+                        break
+
+            if not default_branch:
+                raise GitSyncError("Remote has no default branch to check out")
+
+            remote_ref = f"origin/{default_branch}"
+            self.repo.git.checkout("-B", default_branch, remote_ref)
+            self.repo.git.branch(
+                "--set-upstream-to", remote_ref, default_branch
+            )
+            logger.info(
+                "Successfully initialized local branch from %s", remote_ref
+            )
             return {
-                "action": "clone_pull",
+                "action": "clone",
                 "success": True,
-                "message": "Cloned/pulled latest data from remote",
+                "message": "Cloned latest data from remote",
             }
         except GitCommandError as e:
             logger.error(f"Clone/pull failed: {e}")

@@ -3,6 +3,7 @@ services:
     build: .
     ports:
       - "5001:5001"
+    restart: unless-stopped
     env_file:
       - .github-sync-config
     volumes:
