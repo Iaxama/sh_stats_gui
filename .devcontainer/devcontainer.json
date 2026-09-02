@@ -2,5 +2,6 @@
   "name": "sh_stats_gui",
   "dockerComposeFile": "../docker-compose.yml",
   "service": "app",
+  "overrideCommand": true,
   "workspaceFolder": "/workspaces/sh_stats_gui"
 }

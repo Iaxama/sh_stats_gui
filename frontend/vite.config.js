@@ -7,8 +7,8 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      '/api': 'http://127.0.0.1:5001',
-      '/avatars': 'http://127.0.0.1:5001',
+      '/api': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5001',
+      '/avatars': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5001',
     },
   },
   build: { outDir: 'dist' },
