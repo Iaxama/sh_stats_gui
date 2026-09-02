@@ -2,6 +2,7 @@ services:
   app:
     build: .
     command: sleep infinity
+    network_mode: host
     ports:
       - "5001:5001"
     env_file:
