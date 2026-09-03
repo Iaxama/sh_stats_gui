@@ -4,6 +4,8 @@ import Avatar from '../components/Avatar';
 import PlayerHover from '../components/PlayerHover';
 import styles from './Stats.module.css';
 
+const ELO_WEIGHT = 5;
+
 function computeStats(games, players) {
   const totals = { total: games.length, liberal: 0, fascist: 0, policies: 0, elected: 0, executed: 0 };
   const perPlayer = {};
@@ -36,11 +38,16 @@ function computeStats(games, players) {
   return { totals, perPlayer: Object.values(perPlayer) };
 }
 
+function calculateElo(wins, games, averageWinRate) {
+  return (wins + ELO_WEIGHT * averageWinRate) / (games + ELO_WEIGHT) * 100;
+}
+
 const COLS = [
   { key: 'name', label: 'Player' },
   { key: 'games', label: 'Games' },
   { key: 'wins', label: 'Wins' },
   { key: 'winPct', label: 'Win %' },
+  { key: 'elo', label: 'ELO' },
   { key: 'deaths', label: 'Deaths' },
   { key: 'libGames', label: 'Lib G' },
   { key: 'libWins', label: 'Lib W' },
@@ -61,10 +68,14 @@ export default function Stats() {
   }, []);
 
   const { totals, perPlayer } = computeStats(games, players);
+  const allPlayerGames = perPlayer.reduce((sum, player) => sum + player.games, 0);
+  const allPlayerWins = perPlayer.reduce((sum, player) => sum + player.wins, 0);
+  const averageWinRate = allPlayerGames ? allPlayerWins / allPlayerGames : 0;
 
   const rows = perPlayer.map(r => ({
     ...r,
     winPct: r.games ? Math.round(r.wins / r.games * 100) : 0,
+    elo: calculateElo(r.wins, r.games, averageWinRate),
     libGames: r.byRole.liberal.g, libWins: r.byRole.liberal.w,
     fasGames: r.byRole.fascist.g, fasWins: r.byRole.fascist.w,
     hitGames: r.byRole.hitler.g,  hitWins: r.byRole.hitler.w,
@@ -124,6 +135,7 @@ export default function Stats() {
                 <td>{r.games}</td>
                 <td>{r.wins}</td>
                 <td>{r.winPct}%</td>
+                <td>{Math.round(r.elo)}%</td>
                 <td>{r.deaths}</td>
                 <td>{r.libGames}</td><td>{r.libWins}</td>
                 <td>{r.fasGames}</td><td>{r.fasWins}</td>
