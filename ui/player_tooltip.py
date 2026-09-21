@@ -17,10 +17,12 @@ def _compute_player_stats(player_id: str) -> dict:
     s = {
         "played": 0,
         "liberal": 0, "fascist": 0, "hitler": 0,
-        "wins": 0, "losses": 0, "deaths": 0,
+        "wins": 0, "losses": 0, "deaths": 0, "snipers": 0,
         "lib_wins": 0, "fas_wins": 0, "hit_wins": 0,
     }
     for game in games:
+        if game.sniper_id == player_id:
+            s["snipers"] += 1
         for pr in game.players:
             if pr.player_id != player_id:
                 continue
@@ -218,6 +220,7 @@ class PlayerProfileDialog(QDialog):
             ("Wins",           str(s["wins"])),
             ("Losses",         str(s["losses"])),
             ("Deaths",         str(s["deaths"])),
+            ("Sniper",         str(s["snipers"])),
             ("— as Liberal",   f"{s['liberal']}  ({_pct(s['lib_wins'], s['liberal'])})"),
             ("— as Fascist",   f"{s['fascist']}  ({_pct(s['fas_wins'], s['fascist'])})"),
             ("— as Hitler",    f"{s['hitler']}  ({_pct(s['hit_wins'], s['hitler'])})"),

@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QScrollArea, QWidget, QGridLayout, QCheckBox, QRadioButton,
     QButtonGroup, QFrame, QSizePolicy, QMessageBox,
+    QInputDialog,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -220,6 +221,11 @@ class AddGameDialog(QDialog):
 
     def _populate_cards(self) -> None:
         players = storage.load_players()
+        games_played: dict[str, int] = {}
+        for game in storage.load_games():
+            for result in game.players:
+                games_played[result.player_id] = games_played.get(result.player_id, 0) + 1
+        players.sort(key=lambda player: (-games_played.get(player.id, 0), player.name.casefold()))
         cols = 4
         for i, player in enumerate(players):
             card = PlayerCard(player)
@@ -306,6 +312,25 @@ class AddGameDialog(QDialog):
             self._error_lbl.setText("Select a winning condition.")
             return
 
+        sniper_id = None
+        if winning_team == "liberal" and winning_condition == "hitler_executed":
+            candidates = [(c, r) for c, r in playing if r != "hitler"]
+            labels = [
+                f"{index}. {c.player.name} — {r.capitalize()}"
+                for index, (c, r) in enumerate(candidates, start=1)
+            ]
+            selected_label, confirmed = QInputDialog.getItem(
+                self,
+                "Who killed Hitler?",
+                "Select the player who earned the Sniper stat:",
+                labels,
+                0,
+                False,
+            )
+            if not confirmed:
+                return
+            sniper_id = candidates[labels.index(selected_label)][0].player.id
+
         results = [
             PlayerResult(player_id=c.player.id, role=r, died=c.died())
             for c, r in playing
@@ -315,6 +340,7 @@ class AddGameDialog(QDialog):
             winning_team=winning_team,
             winning_condition=winning_condition,
             date=datetime.now(timezone.utc).isoformat(),
+            sniper_id=sniper_id,
         )
         games = storage.load_games()
         games.append(game)

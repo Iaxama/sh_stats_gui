@@ -18,4 +18,5 @@
 .playerIdentity { display: flex; flex-direction: column; align-items: center; min-width: 0; }
 .pname { display: block; max-width: 100%; margin-top: 0.3rem; overflow: hidden; font-size: 0.75rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 .died { position: absolute; top: 0.2rem; right: 0.25rem; color: #ff1f1f; font-size: 1.35rem; font-weight: bold; line-height: 1; text-shadow: 0 0 2px #fff; }
+.sniper { margin-top: 0.3rem; padding: 0.08rem 0.3rem; border-radius: 3px; background: var(--gold); color: #1a1a1a; font-size: 0.62rem; font-weight: bold; text-transform: uppercase; }
 .cardFooter { margin-top: 0.8rem; display: flex; justify-content: flex-end; }

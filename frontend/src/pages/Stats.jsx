@@ -4,14 +4,14 @@ import Avatar from '../components/Avatar';
 import PlayerHover from '../components/PlayerHover';
 import styles from './Stats.module.css';
 
-const ELO_WEIGHT = 5;
+const ELO_WEIGHT = 10;
 
 function computeStats(games, players) {
   const totals = { total: games.length, liberal: 0, fascist: 0, policies: 0, elected: 0, executed: 0 };
   const perPlayer = {};
 
   for (const p of players) {
-    perPlayer[p.id] = { player: p, games: 0, wins: 0, deaths: 0, byRole: { liberal: { g: 0, w: 0 }, fascist: { g: 0, w: 0 }, hitler: { g: 0, w: 0 } } };
+    perPlayer[p.id] = { player: p, games: 0, wins: 0, deaths: 0, snipers: 0, byRole: { liberal: { g: 0, w: 0 }, fascist: { g: 0, w: 0 }, hitler: { g: 0, w: 0 } } };
   }
 
   for (const g of games) {
@@ -20,6 +20,8 @@ function computeStats(games, players) {
     if (g.winning_condition === 'policies_enacted') totals.policies++;
     else if (g.winning_condition === 'hitler_elected') totals.elected++;
     else totals.executed++;
+
+    if (g.sniper_id && perPlayer[g.sniper_id]) perPlayer[g.sniper_id].snipers++;
 
     for (const pr of g.players) {
       const row = perPlayer[pr.player_id];
@@ -49,6 +51,7 @@ const COLS = [
   { key: 'winPct', label: 'Win %' },
   { key: 'elo', label: 'ELO' },
   { key: 'deaths', label: 'Deaths' },
+  { key: 'snipers', label: 'Sniper' },
   { key: 'libGames', label: 'Lib G' },
   { key: 'libWins', label: 'Lib W' },
   { key: 'fasGames', label: 'Fas G' },
@@ -137,6 +140,7 @@ export default function Stats() {
                 <td>{r.winPct}%</td>
                 <td>{Math.round(r.elo)}%</td>
                 <td>{r.deaths}</td>
+                <td>{r.snipers}</td>
                 <td>{r.libGames}</td><td>{r.libWins}</td>
                 <td>{r.fasGames}</td><td>{r.fasWins}</td>
                 <td>{r.hitGames}</td><td>{r.hitWins}</td>
