@@ -11,12 +11,14 @@ export function getPlayerStats(playerId, games) {
   let wins = 0;
   let losses = 0;
   let deaths = 0;
+  let snipers = 0;
   let played = 0;
   let liberalWins = 0;
   let fascistWins = 0;
   let hitlerWins = 0;
 
   for (const game of games) {
+    if (game.sniper_id === playerId) snipers++;
     const result = game.players.find(entry => entry.player_id === playerId);
     if (!result) continue;
 
@@ -40,7 +42,7 @@ export function getPlayerStats(playerId, games) {
 
   const rate = (won, total) => total ? Math.round(won / total * 100) : 0;
   return {
-    played, wins, losses, deaths, liberal, fascist, hitler,
+    played, wins, losses, deaths, snipers, liberal, fascist, hitler,
     liberalWins, fascistWins, hitlerWins,
     winRate: rate(wins, played),
     liberalWinRate: rate(liberalWins, liberal),

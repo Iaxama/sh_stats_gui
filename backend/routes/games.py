@@ -37,11 +37,26 @@ def create_game():
     from backend.git_sync import GitMergeConflictError
     
     data = request.get_json(force=True)
+    sniper_id = data.get("sniper_id")
+    hitler_was_executed = (
+        data.get("winning_team") == "liberal"
+        and data.get("winning_condition") == "hitler_executed"
+    )
+    if hitler_was_executed:
+        player_roles = {p["player_id"]: p["role"] for p in data.get("players", [])}
+        if not sniper_id:
+            return jsonify({"error": "Select the player who killed Hitler."}), 400
+        if sniper_id not in player_roles or player_roles[sniper_id] == "hitler":
+            return jsonify({"error": "The sniper must be a participating player other than Hitler."}), 400
+    elif sniper_id:
+        return jsonify({"error": "A sniper can only be recorded when Hitler is executed."}), 400
+
     game = Game(
         players=[PlayerResult.from_dict(p) for p in data["players"]],
         winning_team=data["winning_team"],
         winning_condition=data["winning_condition"],
         date=data.get("date", datetime.now(timezone.utc).isoformat()),
+        sniper_id=sniper_id,
     )
     with _lock:
         games = storage.load_games()

@@ -81,7 +81,7 @@ class StatsWindow(QDialog):
         player_lbl.setStyleSheet(f"color: {GOLD};")
         root.addWidget(player_lbl)
 
-        cols = ["Player", "Played", "Liberal", "Fascist", "Hitler", "Wins", "Losses", "Deaths", "Win %", "Win % Lib", "Win % Fas", "Win % Hitler"]
+        cols = ["Player", "Played", "Liberal", "Fascist", "Hitler", "Wins", "Losses", "Deaths", "Sniper", "Win %", "Win % Lib", "Win % Fas", "Win % Hitler"]
         self._table = QTableWidget(0, len(cols))
         self._table.setHorizontalHeaderLabels(cols)
         self._table.verticalHeader().setVisible(False)
@@ -122,12 +122,14 @@ class StatsWindow(QDialog):
     def _populate_table(self, games, players: dict) -> None:
         stats: dict[str, dict] = defaultdict(lambda: {
             "played": 0, "liberal": 0, "fascist": 0, "hitler": 0,
-            "wins": 0, "losses": 0, "deaths": 0,
+            "wins": 0, "losses": 0, "deaths": 0, "snipers": 0,
             "lib_wins": 0, "fas_wins": 0, "hit_wins": 0,
         })
 
         for game in games:
             winner = game.winning_team
+            if game.sniper_id:
+                stats[game.sniper_id]["snipers"] += 1
             for pr in game.players:
                 s = stats[pr.player_id]
                 s["played"] += 1
@@ -166,7 +168,7 @@ class StatsWindow(QDialog):
 
             numeric = [
                 s["played"], s["liberal"], s["fascist"], s["hitler"],
-                s["wins"], s["losses"], s["deaths"],
+                s["wins"], s["losses"], s["deaths"], s["snipers"],
             ]
             pct_pairs = [
                 (s["wins"],     s["played"]),

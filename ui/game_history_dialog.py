@@ -171,6 +171,8 @@ class GameCard(QFrame):
             extras = []
             if pr.died:
                 extras.append("\u2020 died")
+            if game.sniper_id == pr.player_id:
+                extras.append("Sniper")
             if extras:
                 extra_lbl = QLabel(" \u00b7 ".join(extras))
                 extra_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)

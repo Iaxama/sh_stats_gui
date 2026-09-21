@@ -32,6 +32,7 @@ export default function PlayerProfile() {
     ['Wins', stats.wins],
     ['Losses', stats.losses],
     ['Deaths', stats.deaths],
+    ['Sniper', stats.snipers],
     ['As Liberal', `${stats.liberal} (${stats.liberalWinRate}%)`],
     ['As Fascist', `${stats.fascist} (${stats.fascistWinRate}%)`],
     ['As Hitler', `${stats.hitler} (${stats.hitlerWinRate}%)`],

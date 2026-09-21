@@ -45,6 +45,7 @@ function GameCard({ game, games, playerMap, onDelete }) {
                     </>}
                   </div>
                   {pr.died && <span className={styles.died} aria-label="Dead" title="Dead">✕</span>}
+                  {game.sniper_id === pr.player_id && <span className={styles.sniper} title="Killed Hitler">Sniper</span>}
                 </div>
               );
             })}
