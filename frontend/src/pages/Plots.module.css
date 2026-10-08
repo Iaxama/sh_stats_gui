@@ -1,0 +1,192 @@
+.page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  text-align: left;
+}
+
+.pageHeading {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.pageHeading p,
+.cardHeading p,
+.state p {
+  color: var(--text-dim);
+}
+
+.pageHeading p {
+  margin-top: 0.4rem;
+}
+
+.card {
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.cardHeading {
+  padding: 1.1rem 1.2rem 0;
+}
+
+.cardHeading h2 {
+  color: var(--gold);
+  font-size: 1.25rem;
+}
+
+.cardHeading p {
+  margin-top: 0.25rem;
+  font-size: 0.88rem;
+}
+
+.chartScroll {
+  width: 100%;
+  overflow-x: auto;
+  padding: 0 0.5rem 0.5rem;
+  overscroll-behavior-inline: contain;
+}
+
+.chart {
+  width: 100%;
+  height: 390px;
+  padding-top: 0.8rem;
+}
+
+.eloChart {
+  height: 300px;
+}
+
+.legendText {
+  color: var(--text);
+}
+
+.roleLegend {
+  display: flex;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.roleLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.roleLegend i {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 4px solid var(--role-light);
+  background: var(--role-dark);
+}
+
+.roleLegend small {
+  font-size: 0.7rem;
+}
+
+.roleChart {
+  height: 350px;
+}
+
+.tooltip {
+  display: flex;
+  min-width: 150px;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: rgba(26, 26, 26, 0.96);
+  color: var(--text);
+  font-size: 0.78rem;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.35);
+}
+
+.playerControls {
+  height: 90px;
+  overflow-y: auto;
+  padding: 0 1rem 0.5rem;
+}
+
+.playerControls > button {
+  margin: 0 0.3rem 0.45rem 0;
+  padding: 0.3rem 0.65rem;
+  border-color: var(--border);
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.playerLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.playerLegend button {
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--player-color);
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.playerActive {
+  background: color-mix(in srgb, var(--player-color) 24%, var(--surface2));
+  color: var(--text);
+}
+
+.playerHidden {
+  background: transparent;
+  color: var(--text-dim);
+  opacity: 0.45;
+}
+
+.state {
+  display: grid;
+  min-height: 55vh;
+  place-content: center;
+  gap: 0.6rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.error p {
+  color: #fca5a5;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 1.25rem 0 3rem;
+  }
+
+  .pageHeading,
+  .cardHeading {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .pageHeading h1 {
+    font-size: 2.25rem;
+  }
+
+  .chart { height: 330px; }
+  .eloChart { height: 250px; }
+  .playerControls { height: 104px; padding-right: 0.75rem; padding-left: 0.75rem; }
+  .tooltip { max-width: calc(100vw - 2rem); }
+
+  .card {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .roleLegend small {
+    display: none;
+  }
+}

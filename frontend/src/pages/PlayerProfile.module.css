@@ -11,3 +11,12 @@
 .stat span { color: var(--text-dim); font-size: 0.85rem; }
 .lightbox { position: fixed; inset: 0; z-index: 1100; background: rgba(0, 0, 0, 0.8); display: grid; place-items: center; padding: 2rem; cursor: zoom-out; }
 .lightbox img { max-width: min(90vw, 900px); max-height: 90vh; object-fit: contain; cursor: default; }
+
+@media (max-width: 640px) {
+  .page { padding: 1.25rem 0.75rem 2rem; }
+  .profile { margin-top: 1rem; padding: 1.25rem 0.75rem; }
+  .profile h1 { font-size: 1.75rem; }
+  .stat { padding: 0.75rem 0.35rem; }
+  .stat strong { font-size: 1.1rem; }
+  .lightbox { padding: 0.75rem; }
+}

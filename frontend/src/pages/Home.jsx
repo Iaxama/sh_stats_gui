@@ -6,6 +6,7 @@ const NAV = [
   { to: '/players', label: 'Players' },
   { to: '/history', label: 'Game History' },
   { to: '/stats', label: 'View Statistics' },
+  { to: '/plots', label: 'Plots' },
 ];
 
 export default function Home() {

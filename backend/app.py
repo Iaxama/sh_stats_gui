@@ -56,7 +56,10 @@ def _initialize_git_sync() -> GitSync | None:
 def create_app() -> Flask:
     global _git_sync
 
-    app = Flask(__name__, static_folder=_FRONTEND_DIST, static_url_path="")
+    # The catch-all route below serves both SPA routes and built assets. Disabling
+    # Flask's implicit static route prevents it from returning a 404 before the
+    # SPA fallback handles URLs such as /stats and /plots.
+    app = Flask(__name__, static_folder=None)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # Initialize git sync

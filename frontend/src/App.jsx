@@ -7,6 +7,7 @@ import PlayerProfile from './pages/PlayerProfile';
 import AddGame from './pages/AddGame';
 import History from './pages/History';
 import Stats from './pages/Stats';
+import Plots from './pages/Plots';
 
 export default function App() {
   // Sync data with remote repository on app load
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/add-game" element={<AddGame />} />
         <Route path="/history" element={<History />} />
         <Route path="/stats" element={<Stats />} />
+        <Route path="/plots" element={<Plots />} />
       </Routes>
     </BrowserRouter>
   );

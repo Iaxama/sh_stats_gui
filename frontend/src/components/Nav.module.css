@@ -1,4 +1,9 @@
-.nav { display: flex; gap: 0.2rem; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1rem; }
-.link { color: var(--text-dim); text-decoration: none; padding: 0.75rem 1rem; font-size: 0.92rem; border-bottom: 2px solid transparent; transition: color 0.15s; }
+.nav { position: sticky; top: 0; z-index: 100; display: flex; justify-content: center; gap: 0.2rem; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1rem; }
+.link { flex: 0 0 auto; color: var(--text-dim); text-decoration: none; padding: 0.75rem 1rem; font-size: 0.92rem; border-bottom: 2px solid transparent; transition: color 0.15s; }
 .link:hover { color: var(--text); }
 .link.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+@media (max-width: 640px) {
+  .nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 0; }
+  .link { padding: 0.55rem 0.25rem; overflow: hidden; font-size: 0.76rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+}

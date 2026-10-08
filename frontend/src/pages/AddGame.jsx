@@ -5,7 +5,6 @@ import Avatar from '../components/Avatar';
 import PlayerHover from '../components/PlayerHover';
 import styles from './AddGame.module.css';
 
-const ROLES = ['liberal', 'fascist', 'hitler'];
 const WIN_CONDITIONS = {
   liberal: [
     { value: 'policies_enacted', label: 'Policies Enacted' },
@@ -52,11 +51,6 @@ export default function AddGame() {
         return [...sel, { player_id: id, role, died: false }];
       }
     });
-  }
-
-  function clearRole(id) {
-    // Remove player from selected when role is cleared
-    setSelected(sel => sel.filter(s => s.player_id !== id));
   }
 
   function setDied(id, died) {
@@ -152,8 +146,10 @@ export default function AddGame() {
                 <div key={p.id} className={`${styles.playerCard} ${active ? styles.active : ''}`}>
                   <div className={styles.playerHeader}>
                     <PlayerHover player={p} games={games}>
-                      <span>{p.name}</span>
-                      <Avatar path={p.avatar_path} name={p.name} size={150} />
+                      <div className={styles.playerIdentity}>
+                        <span>{p.name}</span>
+                        <Avatar path={p.avatar_path} name={p.name} size={150} />
+                      </div>
                     </PlayerHover>
                   </div>
                   <div className={styles.playerControls}>
@@ -216,7 +212,7 @@ export default function AddGame() {
         </section>
 
         {error && <p className="error-msg">{error}</p>}
-        <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', marginTop: '1.2rem' }}>
+        <div className={styles.formActions}>
           <button type="button" className="btn-secondary" onClick={() => navigate('/')}>Cancel</button>
           <button type="submit" className="btn-primary" disabled={saving}>
             {saving ? 'Saving…' : 'Save Game'}

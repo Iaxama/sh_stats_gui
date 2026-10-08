@@ -7,12 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "test": "node --test src/utils/statistics.test.js",
     "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-easy-crop": "^6.2.3",
+    "react-is": "^18.3.1",
+    "recharts": "^3.10.1",
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {

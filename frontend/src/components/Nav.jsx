@@ -7,6 +7,7 @@ const LINKS = [
   { to: '/add-game', label: 'Add Game' },
   { to: '/history', label: 'History' },
   { to: '/stats', label: 'Stats' },
+  { to: '/plots', label: 'Plots' },
 ];
 
 export default function Nav() {
