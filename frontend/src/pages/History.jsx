@@ -1,14 +1,16 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { getGames, getPlayers, deleteGame } from '../api';
 import Avatar from '../components/Avatar';
 import PlayerHover from '../components/PlayerHover';
+import { buildEloHistory, sortGamesChronologically } from '../utils/statistics';
 import styles from './History.module.css';
 
 function roleClass(role) {
   return role === 'hitler' ? 'role-hitler' : role === 'fascist' ? 'role-fascist' : 'role-liberal';
 }
 
-function GameCard({ game, games, playerMap, onDelete }) {
+function GameCard({ game, games, playerMap, eloRatings, onDelete }) {
   const [open, setOpen] = useState(false);
   const date = new Date(game.date).toLocaleDateString(undefined, { dateStyle: 'medium' });
   const teamLabel = game.winning_team === 'liberal' ? 'Liberal' : 'Fascist';
@@ -33,15 +35,19 @@ function GameCard({ game, games, playerMap, onDelete }) {
           <div className={styles.playerList}>
             {game.players.map(pr => {
               const p = playerMap[pr.player_id];
+              const elo = eloRatings?.[pr.player_id];
+              const eloLabel = Number.isFinite(elo) ? Math.round(elo) : '—';
               return (
                 <div key={pr.player_id} className={`${styles.playerCard} ${styles[roleClass(pr.role)]}`}>
                   <div className={styles.playerIdentity}>
                     {p ? <PlayerHover player={p} games={games}>
                       <Avatar path={p.avatar_path} name={p.name} size={32} />
                       <span className={styles.pname}>{p.name}</span>
+                      <span className={styles.elo} title="ELO after this game">{eloLabel}</span>
                     </PlayerHover> : <>
                       <Avatar path={undefined} name="?" size={32} />
                       <span className={styles.pname}>Unknown</span>
+                      <span className={styles.elo}>—</span>
                     </>}
                   </div>
                   {pr.died && <span className={styles.died} aria-label="Dead" title="Dead">✕</span>}
@@ -62,11 +68,14 @@ function GameCard({ game, games, playerMap, onDelete }) {
 export default function History() {
   const [games, setGames] = useState([]);
   const [playerMap, setPlayerMap] = useState({});
+  const [eloByGame, setEloByGame] = useState({});
 
   async function load() {
     const [g, p] = await Promise.all([getGames(), getPlayers()]);
-    setGames([...g].reverse());
+    const eloHistory = buildEloHistory(g, p);
+    setGames([...sortGamesChronologically(g)].reverse());
     setPlayerMap(Object.fromEntries(p.map(pl => [pl.id, pl])));
+    setEloByGame(Object.fromEntries(eloHistory.map(point => [point.gameId, point])));
   }
 
   useEffect(() => { load(); }, []);
@@ -74,7 +83,7 @@ export default function History() {
   async function handleDelete(id) {
     if (!confirm('Delete this game?')) return;
     await deleteGame(id);
-    setGames(gs => gs.filter(g => g.id !== id));
+    await load();
   }
 
   return (
@@ -83,7 +92,14 @@ export default function History() {
       {games.length === 0 && <p style={{ color: 'var(--text-dim)', marginTop: '1rem' }}>No games recorded yet.</p>}
       <div className={styles.list}>
         {games.map(g => (
-          <GameCard key={g.id} game={g} games={games} playerMap={playerMap} onDelete={handleDelete} />
+          <GameCard
+            key={g.id}
+            game={g}
+            games={games}
+            playerMap={playerMap}
+            eloRatings={eloByGame[g.id]}
+            onDelete={handleDelete}
+          />
         ))}
       </div>
     </div>

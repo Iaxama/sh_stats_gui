@@ -2,47 +2,8 @@ import { useEffect, useState } from 'react';
 import { getGames, getPlayers } from '../api';
 import Avatar from '../components/Avatar';
 import PlayerHover from '../components/PlayerHover';
+import { calculateEloRatings, computeStats } from '../utils/statistics';
 import styles from './Stats.module.css';
-
-const ELO_WEIGHT = 10;
-
-function computeStats(games, players) {
-  const totals = { total: games.length, liberal: 0, fascist: 0, policies: 0, elected: 0, executed: 0 };
-  const perPlayer = {};
-
-  for (const p of players) {
-    perPlayer[p.id] = { player: p, games: 0, wins: 0, deaths: 0, snipers: 0, byRole: { liberal: { g: 0, w: 0 }, fascist: { g: 0, w: 0 }, hitler: { g: 0, w: 0 } } };
-  }
-
-  for (const g of games) {
-    if (g.winning_team === 'liberal') totals.liberal++;
-    else totals.fascist++;
-    if (g.winning_condition === 'policies_enacted') totals.policies++;
-    else if (g.winning_condition === 'hitler_elected') totals.elected++;
-    else totals.executed++;
-
-    if (g.sniper_id && perPlayer[g.sniper_id]) perPlayer[g.sniper_id].snipers++;
-
-    for (const pr of g.players) {
-      const row = perPlayer[pr.player_id];
-      if (!row) continue;
-      row.games++;
-      const won = (g.winning_team === 'liberal' && pr.role === 'liberal') ||
-                  (g.winning_team === 'fascist' && (pr.role === 'fascist' || pr.role === 'hitler'));
-      if (won) row.wins++;
-      if (pr.died) row.deaths++;
-      const rb = row.byRole[pr.role];
-      rb.g++;
-      if (won) rb.w++;
-    }
-  }
-
-  return { totals, perPlayer: Object.values(perPlayer) };
-}
-
-function calculateElo(wins, games, averageWinRate) {
-  return (wins + ELO_WEIGHT * averageWinRate) / (games + ELO_WEIGHT) * 100;
-}
 
 const COLS = [
   { key: 'name', label: 'Player' },
@@ -71,14 +32,12 @@ export default function Stats() {
   }, []);
 
   const { totals, perPlayer } = computeStats(games, players);
-  const allPlayerGames = perPlayer.reduce((sum, player) => sum + player.games, 0);
-  const allPlayerWins = perPlayer.reduce((sum, player) => sum + player.wins, 0);
-  const averageWinRate = allPlayerGames ? allPlayerWins / allPlayerGames : 0;
+  const eloRatings = calculateEloRatings(games, players);
 
   const rows = perPlayer.map(r => ({
     ...r,
     winPct: r.games ? Math.round(r.wins / r.games * 100) : 0,
-    elo: calculateElo(r.wins, r.games, averageWinRate),
+    elo: eloRatings[r.player.id],
     libGames: r.byRole.liberal.g, libWins: r.byRole.liberal.w,
     fasGames: r.byRole.fascist.g, fasWins: r.byRole.fascist.w,
     hitGames: r.byRole.hitler.g,  hitWins: r.byRole.hitler.w,
@@ -128,7 +87,7 @@ export default function Stats() {
             {rows.map(r => (
               <tr key={r.player.id}>
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className={styles.playerCell}>
                     <PlayerHover player={r.player} games={games}>
                       <Avatar path={r.player.avatar_path} name={r.player.name} size={100} />
                       {r.player.name}
@@ -138,7 +97,7 @@ export default function Stats() {
                 <td>{r.games}</td>
                 <td>{r.wins}</td>
                 <td>{r.winPct}%</td>
-                <td>{Math.round(r.elo)}%</td>
+                <td>{Math.round(r.elo)}</td>
                 <td>{r.deaths}</td>
                 <td>{r.snipers}</td>
                 <td>{r.libGames}</td><td>{r.libWins}</td>
