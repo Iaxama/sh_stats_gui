@@ -176,11 +176,12 @@ export function buildRoleStats(games, players) {
     .map(row => ({
       playerId: row.player.id,
       playerName: row.player.name,
+      totalGames: row.games,
       liberal: { games: row.byRole.liberal.g, wins: row.byRole.liberal.w },
       fascist: { games: row.byRole.fascist.g, wins: row.byRole.fascist.w },
       hitler: { games: row.byRole.hitler.g, wins: row.byRole.hitler.w },
     }))
-    .sort((a, b) => a.playerName.localeCompare(b.playerName));
+    .sort((a, b) => b.totalGames - a.totalGames || a.playerName.localeCompare(b.playerName));
 }
 
 export function buildGameSizeStats(games) {
