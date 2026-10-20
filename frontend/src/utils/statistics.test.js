@@ -90,6 +90,15 @@ test('role statistics keep Hitler separate and ignore unknown players', () => {
   assert.deepEqual(carla.hitler, { games: 1, wins: 1 });
 });
 
+test('role statistics put players with the most games first and break ties by name', () => {
+  const rows = buildRoleStats(games, players);
+
+  assert.deepEqual(
+    rows.map(row => [row.playerName, row.totalGames]),
+    [['Bruno', 3], ['Ada', 2], ['Carla', 1]],
+  );
+});
+
 test('game-size buckets expose raw counts and ratios that sum to one', () => {
   const buckets = buildGameSizeStats(games);
   assert.deepEqual(buckets.map(bucket => bucket.playerCount), [2, 3]);
