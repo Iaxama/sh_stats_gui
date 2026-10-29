@@ -15,6 +15,8 @@ import {
 } from 'recharts';
 
 import { getGames, getPlayers } from '../api';
+import ScopeToggle from '../components/ScopeToggle';
+import useScope, { applyScope } from '../hooks/useScope';
 import { buildPlotData } from '../utils/statistics';
 import styles from './Plots.module.css';
 
@@ -155,8 +157,14 @@ function ChartCard({ title, description, children, minWidth = 0 }) {
 }
 
 export default function Plots() {
-  const [games, setGames] = useState([]);
-  const [players, setPlayers] = useState([]);
+  const [allGames, setGames] = useState([]);
+  const [allPlayers, setPlayers] = useState([]);
+  const scopeState = useScope();
+  const { scope, currentSeason, showRetired } = scopeState;
+  const { games, players } = useMemo(
+    () => applyScope(scope, allGames, allPlayers, currentSeason, showRetired),
+    [scope, allGames, allPlayers, currentSeason, showRetired],
+  );
   const [hiddenPlayers, setHiddenPlayers] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -214,7 +222,8 @@ export default function Plots() {
     return (
       <main className={styles.state}>
         <h1>Plots</h1>
-        <p>No games have been recorded yet.</p>
+        <ScopeToggle {...scopeState} hasRetired={allPlayers.some(p => p.retired)} />
+        <p>No games have been recorded yet{scope === 'season' ? ' this season' : ''}.</p>
       </main>
     );
   }
@@ -226,11 +235,35 @@ export default function Plots() {
       <header className={styles.pageHeading}>
         <h1>Plots</h1>
         <p>{games.length} games across {players.length} players</p>
+        <ScopeToggle {...scopeState} hasRetired={allPlayers.some(p => p.retired)} />
       </header>
 
       <ChartCard
         title="Fascist vs Liberal Wins Over Time"
         description="Cumulative wins after each recorded game."
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={plotData.cumulativeWins} margin={{ top: 12, right: 24, bottom: 12, left: 0 }}>
+            <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" />
+            <XAxis
+              dataKey="time"
+              type="number"
+              domain={['dataMin', 'dataMax']}
+              tickFormatter={formatShortDate}
+              stroke={COLORS.text}
+            />
+            <YAxis allowDecimals={false} stroke={COLORS.text} width={42} />
+            <Tooltip content={<ChartTooltip />} />
+            <Legend formatter={renderLegendLabel} />
+            <Line type="stepAfter" dataKey="liberal" name="Liberal" stroke={COLORS.liberal} strokeWidth={3} dot={false} isAnimationActive={false} />
+            <Line type="stepAfter" dataKey="fascist" name="Fascist" stroke={COLORS.fascistLight} strokeWidth={3} dot={false} isAnimationActive={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartCard>
+
+      <ChartCard
+        title="Election Pool"
+        description="Test copy of the win race: cumulative Liberal vs Fascist wins after each game."
       >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={plotData.cumulativeWins} margin={{ top: 12, right: 24, bottom: 12, left: 0 }}>

@@ -30,6 +30,8 @@ class Game:
     winning_condition: WinningCondition
     date: str
     sniper_id: Optional[str] = None
+    hitler_chooser_id: Optional[str] = None
+    season_id: Optional[str] = None
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
     def to_dict(self) -> dict:
@@ -40,6 +42,8 @@ class Game:
             "winning_team": self.winning_team,
             "winning_condition": self.winning_condition,
             "sniper_id": self.sniper_id,
+            "hitler_chooser_id": self.hitler_chooser_id,
+            "season_id": self.season_id,
         }
 
     @staticmethod
@@ -51,4 +55,6 @@ class Game:
             winning_team=d["winning_team"],
             winning_condition=d["winning_condition"],
             sniper_id=d.get("sniper_id"),
+            hitler_chooser_id=d.get("hitler_chooser_id"),
+            season_id=d.get("season_id"),
         )

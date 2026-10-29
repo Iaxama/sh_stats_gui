@@ -48,6 +48,8 @@ export function computeStats(games, players) {
       wins: 0,
       deaths: 0,
       snipers: 0,
+      dumbo: 0,
+      dictator: 0,
       byRole: Object.fromEntries(ROLES.map(role => [role, { g: 0, w: 0 }])),
     };
   }
@@ -62,6 +64,12 @@ export function computeStats(games, players) {
 
     if (game.sniper_id && perPlayer[game.sniper_id]) {
       perPlayer[game.sniper_id].snipers++;
+    }
+
+    if (game.hitler_chooser_id && perPlayer[game.hitler_chooser_id]) {
+      const chooser = (game.players ?? []).find(result => result.player_id === game.hitler_chooser_id);
+      if (chooser?.role === 'liberal') perPlayer[game.hitler_chooser_id].dumbo++;
+      else if (chooser?.role === 'fascist') perPlayer[game.hitler_chooser_id].dictator++;
     }
 
     for (const result of game.players ?? []) {

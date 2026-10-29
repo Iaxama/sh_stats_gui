@@ -15,7 +15,8 @@
 .roleBtn.roleActive { font-weight: 600; }
 .diedLabel { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--text-dim); cursor: pointer; white-space: nowrap; width: auto; }
 .diedLabel input { width: auto; }
-.resultRow { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.resultRow { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 1rem; }
+.resultRow :global(.field) + :global(.field) { margin-top: 0; }
 .modalBackdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 1rem; background: rgba(0, 0, 0, 0.72); }
 .modal { width: min(440px, 100%); padding: 1.4rem; border: 1px solid var(--gold-dark); border-radius: 8px; background: var(--surface); box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); }
 .modal h2 { color: var(--gold); }

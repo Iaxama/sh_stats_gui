@@ -43,6 +43,7 @@ function GameCard({ game, games, playerMap, eloRatings, onDelete }) {
                     {p ? <PlayerHover player={p} games={games}>
                       <Avatar path={p.avatar_path} name={p.name} size={32} />
                       <span className={styles.pname}>{p.name}</span>
+                      {game.sniper_id === pr.player_id && <span className={styles.gun} role="img" aria-label="Sniper" title="Killed Hitler">🔫</span>}
                       <span className={styles.elo} title="ELO after this game">{eloLabel}</span>
                     </PlayerHover> : <>
                       <Avatar path={undefined} name="?" size={32} />
@@ -50,8 +51,10 @@ function GameCard({ game, games, playerMap, eloRatings, onDelete }) {
                       <span className={styles.elo}>—</span>
                     </>}
                   </div>
-                  {pr.died && <span className={styles.died} aria-label="Dead" title="Dead">✕</span>}
-                  {game.sniper_id === pr.player_id && <span className={styles.sniper} title="Killed Hitler">Sniper</span>}
+                  {pr.died && <span className={styles.died} aria-label="Dead" title="Dead">✝</span>}
+                  {game.hitler_chooser_id === pr.player_id && (
+                    <span className={styles.sniper} title="Elected Hitler">{pr.role === 'liberal' ? 'Dumbo' : 'Dictator'}</span>
+                  )}
                 </div>
               );
             })}

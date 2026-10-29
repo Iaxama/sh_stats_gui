@@ -27,6 +27,8 @@ export default function AddGame() {
   const [error, setError] = useState('');
   const [showSniperDialog, setShowSniperDialog] = useState(false);
   const [sniperId, setSniperId] = useState('');
+  const [showChooserDialog, setShowChooserDialog] = useState(false);
+  const [chooserId, setChooserId] = useState('');
 
   useEffect(() => {
     Promise.all([getPlayers(), getGames()]).then(([loadedPlayers, loadedGames]) => {
@@ -79,7 +81,7 @@ export default function AddGame() {
     return true;
   }
 
-  async function saveGame(selectedSniperId = null) {
+  async function saveGame(selectedSniperId = null, selectedChooserId = null) {
     setSaving(true);
     setError('');
     try {
@@ -88,6 +90,7 @@ export default function AddGame() {
         winning_team: winningTeam,
         winning_condition: winningCondition,
         sniper_id: selectedSniperId,
+        hitler_chooser_id: selectedChooserId,
       });
       navigate('/history');
     } catch (err) {
@@ -108,7 +111,23 @@ export default function AddGame() {
       return;
     }
 
+    if (winningTeam === 'fascist' && winningCondition === 'hitler_elected') {
+      const candidates = selected.filter(entry => entry.role !== 'hitler');
+      setChooserId(candidates[0]?.player_id ?? '');
+      setShowChooserDialog(true);
+      return;
+    }
+
     saveGame();
+  }
+
+  function confirmChooser() {
+    if (!chooserId) {
+      setError('Select the player who elected Hitler.');
+      return;
+    }
+    setShowChooserDialog(false);
+    saveGame(null, chooserId);
   }
 
   function confirmSniper() {
@@ -126,7 +145,7 @@ export default function AddGame() {
     }
     return counts;
   }, {});
-  const sortedPlayers = [...players].sort((a, b) =>
+  const sortedPlayers = players.filter(p => !p.retired).sort((a, b) =>
     (gamesPlayed[b.id] ?? 0) - (gamesPlayed[a.id] ?? 0)
       || a.name.localeCompare(b.name)
   );
@@ -237,6 +256,28 @@ export default function AddGame() {
             <div className={styles.modalActions}>
               <button type="button" className="btn-secondary" onClick={() => setShowSniperDialog(false)}>Back</button>
               <button type="button" className="btn-primary" onClick={confirmSniper} disabled={saving}>Confirm &amp; Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showChooserDialog && (
+        <div className={styles.modalBackdrop} role="presentation">
+          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="chooser-dialog-title">
+            <h2 id="chooser-dialog-title">Who elected Hitler?</h2>
+            <p>A Liberal who did it is a Dumbo; a Fascist who did it is a Dictator.</p>
+            <div className="field">
+              <label htmlFor="chooser-player">Player</label>
+              <select id="chooser-player" value={chooserId} onChange={e => setChooserId(e.target.value)} autoFocus>
+                {selected.filter(entry => entry.role !== 'hitler').map(entry => {
+                  const player = players.find(candidate => candidate.id === entry.player_id);
+                  const label = entry.role === 'liberal' ? 'Dumbo' : 'Dictator';
+                  return <option key={entry.player_id} value={entry.player_id}>{player?.name ?? 'Unknown player'} ({label})</option>;
+                })}
+              </select>
+            </div>
+            <div className={styles.modalActions}>
+              <button type="button" className="btn-secondary" onClick={() => setShowChooserDialog(false)}>Back</button>
+              <button type="button" className="btn-primary" onClick={confirmChooser} disabled={saving}>Confirm &amp; Save</button>
             </div>
           </div>
         </div>

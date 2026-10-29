@@ -58,6 +58,7 @@ def update_player(player_id: str):
             if p.id == player_id:
                 p.name = data.get("name", p.name)
                 p.avatar_crop = data.get("avatar_crop", p.avatar_crop)
+                p.retired = bool(data.get("retired", p.retired))
                 try:
                     storage.save_players(players, git_sync=_git_sync)
                 except GitMergeConflictError as e:
@@ -78,6 +79,8 @@ def delete_player(player_id: str):
         deleted = next(p for p in players if p.id == player_id)
         if deleted.avatar_path:
             storage.delete_avatar(deleted.avatar_path)
+        if deleted.avatar_full_path:
+            storage.delete_avatar(deleted.avatar_full_path)
         try:
             storage.save_players(remaining, git_sync=_git_sync)
         except GitMergeConflictError as e:
@@ -92,22 +95,31 @@ def upload_avatar(player_id: str):
     if "avatar" not in request.files:
         return jsonify({"error": "no file"}), 400
     file = request.files["avatar"]
+    full_file = request.files.get("avatar_full")
     ext = os.path.splitext(file.filename)[1] or ".png"
     filename = f"{os.urandom(8).hex()}{ext}"
     dest = os.path.join(storage.AVATARS_DIR, filename)
     storage._ensure_dirs()
     file.save(dest)
     relative = os.path.join("assets", "avatars", filename)
+    full_relative = None
+    if full_file:
+        full_name = f"{os.urandom(8).hex()}{os.path.splitext(full_file.filename)[1] or '.jpg'}"
+        full_file.save(os.path.join(storage.AVATARS_DIR, full_name))
+        full_relative = os.path.join("assets", "avatars", full_name)
     with _lock:
         players = storage.load_players()
         for p in players:
             if p.id == player_id:
                 if p.avatar_path:
                     storage.delete_avatar(p.avatar_path)
+                if p.avatar_full_path:
+                    storage.delete_avatar(p.avatar_full_path)
+                p.avatar_full_path = full_relative
                 p.avatar_path = relative
                 try:
                     storage.save_players(players, git_sync=_git_sync)
                 except GitMergeConflictError as e:
                     return jsonify({"error": "Merge conflict", "details": str(e)}), 409
-                return jsonify({"avatar_path": relative})
+                return jsonify({"avatar_path": relative, "avatar_full_path": p.avatar_full_path})
     return jsonify({"error": "not found"}), 404

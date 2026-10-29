@@ -10,6 +10,7 @@ from flask_cors import CORS
 
 from backend.routes.players import players_bp, set_git_sync as set_players_git_sync
 from backend.routes.games import games_bp, set_git_sync as set_games_git_sync
+from backend.routes.seasons import seasons_bp, set_git_sync as set_seasons_git_sync
 from backend.git_sync import GitSync, GitSyncError, GitAuthError, GitMergeConflictError
 
 # Configure logging
@@ -68,11 +69,13 @@ def create_app() -> Flask:
         logging.info("Git sync enabled")
         set_players_git_sync(_git_sync)
         set_games_git_sync(_git_sync)
+        set_seasons_git_sync(_git_sync)
     else:
         logging.info("Git sync disabled (GIT_DATA_REPO_URL not set)")
 
     app.register_blueprint(players_bp)
     app.register_blueprint(games_bp)
+    app.register_blueprint(seasons_bp)
 
     @app.route("/avatars/<path:filename>")
     def serve_avatar(filename: str):

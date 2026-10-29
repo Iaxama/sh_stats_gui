@@ -27,6 +27,7 @@ function getCroppedBlob(imageSrc, crop, zoom) {
 
 export default function AvatarCrop({ playerId, onDone, onCancel }) {
   const [src, setSrc] = useState(null);
+  const [originalFile, setOriginalFile] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedArea, setCroppedArea] = useState(null);
@@ -38,6 +39,7 @@ export default function AvatarCrop({ playerId, onDone, onCancel }) {
   function handleFile(e) {
     const file = e.target.files[0];
     if (!file) { onCancel(); return; }
+    setOriginalFile(file);
     const url = URL.createObjectURL(file);
     setSrc(url);
   }
@@ -48,7 +50,7 @@ export default function AvatarCrop({ playerId, onDone, onCancel }) {
     try {
       const blob = await getCroppedBlob(src, croppedArea, zoom);
       const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-      const result = await uploadAvatar(playerId, file);
+      const result = await uploadAvatar(playerId, file, originalFile);
       await updatePlayer(playerId, { avatar_crop: { zoom, x: crop.x, y: crop.y } });
       onDone(result.avatar_path);
     } finally {

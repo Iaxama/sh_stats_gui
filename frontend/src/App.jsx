@@ -8,6 +8,7 @@ import AddGame from './pages/AddGame';
 import History from './pages/History';
 import Stats from './pages/Stats';
 import Plots from './pages/Plots';
+import HallOfFame from './pages/HallOfFame';
 
 export default function App() {
   // Sync data with remote repository on app load
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/history" element={<History />} />
         <Route path="/stats" element={<Stats />} />
         <Route path="/plots" element={<Plots />} />
+        <Route path="/hall-of-fame" element={<HallOfFame />} />
       </Routes>
     </BrowserRouter>
   );

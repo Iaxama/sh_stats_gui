@@ -33,6 +33,8 @@ export default function PlayerProfile() {
     ['Losses', stats.losses],
     ['Deaths', stats.deaths],
     ['Sniper', stats.snipers],
+    ['Dumbo', stats.dumbo],
+    ['Dictator', stats.dictator],
     ['As Liberal', `${stats.liberal} (${stats.liberalWinRate}%)`],
     ['As Fascist', `${stats.fascist} (${stats.fascistWinRate}%)`],
     ['As Hitler', `${stats.hitler} (${stats.hitlerWinRate}%)`],
@@ -55,7 +57,7 @@ export default function PlayerProfile() {
       </section>
       {imageOpen && (
         <div className={styles.lightbox} role="dialog" aria-modal="true" onClick={() => setImageOpen(false)}>
-          <img src={avatarUrl(player.avatar_path)} alt={`${player.name}'s profile`} onClick={event => event.stopPropagation()} />
+          <img src={avatarUrl(player.avatar_full_path || player.avatar_path)} alt={`${player.name}'s profile`} onClick={event => event.stopPropagation()} />
         </div>
       )}
     </div>

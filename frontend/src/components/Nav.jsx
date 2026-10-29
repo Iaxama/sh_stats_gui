@@ -8,6 +8,7 @@ const LINKS = [
   { to: '/history', label: 'History' },
   { to: '/stats', label: 'Stats' },
   { to: '/plots', label: 'Plots' },
+  { to: '/hall-of-fame', label: 'Hall of Fame' },
 ];
 
 export default function Nav() {

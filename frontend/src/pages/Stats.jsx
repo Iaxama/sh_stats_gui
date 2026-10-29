@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getGames, getPlayers } from '../api';
 import Avatar from '../components/Avatar';
 import PlayerHover from '../components/PlayerHover';
+import ScopeToggle from '../components/ScopeToggle';
+import useScope, { applyScope } from '../hooks/useScope';
 import { calculateEloRatings, computeStats } from '../utils/statistics';
 import styles from './Stats.module.css';
 
@@ -13,6 +15,8 @@ const COLS = [
   { key: 'elo', label: 'ELO' },
   { key: 'deaths', label: 'Deaths' },
   { key: 'snipers', label: 'Sniper' },
+  { key: 'dumbo', label: 'Dumbo' },
+  { key: 'dictator', label: 'Dictator' },
   { key: 'libGames', label: 'Lib G' },
   { key: 'libWins', label: 'Lib W' },
   { key: 'fasGames', label: 'Fas G' },
@@ -22,8 +26,10 @@ const COLS = [
 ];
 
 export default function Stats() {
-  const [games, setGames] = useState([]);
-  const [players, setPlayers] = useState([]);
+  const [allGames, setGames] = useState([]);
+  const [allPlayers, setPlayers] = useState([]);
+  const scopeState = useScope();
+  const { scope, currentSeason, showRetired } = scopeState;
   const [sortKey, setSortKey] = useState('games');
   const [sortDir, setSortDir] = useState(-1);
 
@@ -31,6 +37,10 @@ export default function Stats() {
     Promise.all([getGames(), getPlayers()]).then(([g, p]) => { setGames(g); setPlayers(p); });
   }, []);
 
+  const { games, players } = useMemo(
+    () => applyScope(scope, allGames, allPlayers, currentSeason, showRetired),
+    [scope, allGames, allPlayers, currentSeason, showRetired],
+  );
   const { totals, perPlayer } = computeStats(games, players);
   const eloRatings = calculateEloRatings(games, players);
 
@@ -55,6 +65,7 @@ export default function Stats() {
   return (
     <div className={styles.page}>
       <h1>Statistics</h1>
+      <ScopeToggle {...scopeState} hasRetired={allPlayers.some(p => p.retired)} />
 
       <div className={styles.overallGrid}>
         {[
@@ -100,6 +111,8 @@ export default function Stats() {
                 <td>{Math.round(r.elo)}</td>
                 <td>{r.deaths}</td>
                 <td>{r.snipers}</td>
+                <td>{r.dumbo}</td>
+                <td>{r.dictator}</td>
                 <td>{r.libGames}</td><td>{r.libWins}</td>
                 <td>{r.fasGames}</td><td>{r.fasWins}</td>
                 <td>{r.hitGames}</td><td>{r.hitWins}</td>

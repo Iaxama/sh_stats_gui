@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getGames, getPlayers, createPlayer, updatePlayer, deletePlayer } from '../api';
+import { getGames, getPlayers, getSeasons, createPlayer, updatePlayer, deletePlayer, startSeason } from '../api';
 import Avatar from '../components/Avatar';
 import AvatarCrop from '../components/AvatarCrop';
 import PlayerHover from '../components/PlayerHover';
@@ -69,13 +69,71 @@ function PlayerModal({ player, onClose, onSaved }) {
   );
 }
 
+function NewSeasonModal({ players, season, onClose, onStarted }) {
+  const [retireIds, setRetireIds] = useState(() => new Set());
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function toggle(id) {
+    setRetireIds(current => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function confirmStart() {
+    setSaving(true);
+    setError('');
+    try {
+      await startSeason([...retireIds]);
+      onStarted();
+    } catch (err) {
+      setError(err.message);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal">
+        <h2>Start a new season</h2>
+        <p style={{ color: 'var(--text-dim)' }}>
+          {season ? `${season.name} will end and its Hall of Fame awards will be saved. ` : ''}
+          Select the players who no longer play to retire them. They stay in the all-time stats.
+        </p>
+        <div className={styles.retireList}>
+          {players.map(p => (
+            <label key={p.id} className={styles.retireItem}>
+              <input type="checkbox" checked={retireIds.has(p.id)} onChange={() => toggle(p.id)} />
+              <Avatar path={p.avatar_path} name={p.name} size={32} />
+              <span>{p.name}</span>
+            </label>
+          ))}
+        </div>
+        {error && <p className="error-msg">{error}</p>}
+        <div className="modal-actions">
+          <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
+          <button type="button" className="btn-primary" onClick={confirmStart} disabled={saving}>
+            {saving ? 'Starting…' : 'Start new season'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Players() {
   const [players, setPlayers] = useState([]);
   const [games, setGames] = useState([]);
-  const [modal, setModal] = useState(null); // null | 'add' | player-obj
+  const [modal, setModal] = useState(null); // null | 'add' | 'season' | player-obj
+  const [showRetired, setShowRetired] = useState(false);
+  const [seasons, setSeasons] = useState([]);
 
   async function load() {
-    const [loadedPlayers, loadedGames] = await Promise.all([getPlayers(), getGames()]);
+    const [loadedPlayers, loadedGames, loadedSeasons] = await Promise.all([getPlayers(), getGames(), getSeasons()]);
+    setSeasons(loadedSeasons);
     setPlayers(loadedPlayers);
     setGames(loadedGames);
   }
@@ -86,6 +144,12 @@ export default function Players() {
     if (!confirm('Delete this player?')) return;
     await deletePlayer(id);
     setPlayers(ps => ps.filter(p => p.id !== id));
+  }
+
+  async function handleRetire(player, retired) {
+    if (retired && !confirm(`Retire ${player.name}? They will be excluded from the current season.`)) return;
+    const saved = await updatePlayer(player.id, { retired });
+    setPlayers(ps => ps.map(p => (p.id === saved.id ? saved : p)));
   }
 
   function handleSaved(saved) {
@@ -105,24 +169,41 @@ export default function Players() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>Players</h1>
-        <button className="btn-primary" onClick={() => setModal('add')}>+ Add Player</button>
+        <div className={styles.headerActions}>
+          {players.some(p => p.retired) && (
+            <button className="btn-secondary" onClick={() => setShowRetired(v => !v)}>
+              {showRetired ? 'Hide retired' : 'Show retired'}
+            </button>
+          )}
+          <button className="btn-secondary" onClick={() => setModal('season')}>Start New Season</button>
+          <button className="btn-primary" onClick={() => setModal('add')}>+ Add Player</button>
+        </div>
       </div>
       <div className={styles.list}>
         {players.length === 0 && <p style={{ color: 'var(--text-dim)' }}>No players yet.</p>}
-        {players.map(p => (
-          <div key={p.id} className={styles.row}>
+        {players.filter(p => showRetired || !p.retired).map(p => (
+          <div key={p.id} className={`${styles.row} ${p.retired ? styles.retired : ''}`}>
             <PlayerHover player={p} games={games}>
               <Avatar path={p.avatar_path} name={p.name} size={150} />
-              <span className={styles.name}>{p.name}</span>
+              <span className={styles.name}>{p.name}{p.retired && <em className={styles.badge}>Retired</em>}</span>
             </PlayerHover>
             <div className={styles.actions}>
               <button className="btn-secondary" onClick={() => setModal(p)}>Edit</button>
+              <button className="btn-secondary" onClick={() => handleRetire(p, !p.retired)}>{p.retired ? 'Unretire' : 'Retire'}</button>
               <button className="btn-danger" onClick={() => handleDelete(p.id)}>Delete</button>
             </div>
           </div>
         ))}
       </div>
-      {modal && (
+      {modal === 'season' && (
+        <NewSeasonModal
+          players={players.filter(p => !p.retired)}
+          season={seasons.find(season => season.end_date == null)}
+          onClose={() => setModal(null)}
+          onStarted={() => { setModal(null); load(); }}
+        />
+      )}
+      {modal && modal !== 'season' && (
         <PlayerModal
           player={modal === 'add' ? null : modal}
           onClose={() => setModal(null)}

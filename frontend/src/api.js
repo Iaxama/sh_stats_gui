@@ -19,12 +19,16 @@ export const getPlayers = () => req('GET', '/players');
 export const createPlayer = (data) => req('POST', '/players', data);
 export const updatePlayer = (id, data) => req('PUT', `/players/${id}`, data);
 export const deletePlayer = (id) => req('DELETE', `/players/${id}`);
-export const uploadAvatar = (id, file) => {
+export const uploadAvatar = (id, file, fullFile) => {
   const fd = new FormData();
   fd.append('avatar', file);
+  if (fullFile) fd.append('avatar_full', fullFile);
   return req('POST', `/players/${id}/avatar`, fd);
 };
 
 export const getGames = () => req('GET', '/games');
 export const createGame = (data) => req('POST', '/games', data);
 export const deleteGame = (id) => req('DELETE', `/games/${id}`);
+
+export const getSeasons = () => req('GET', '/seasons');
+export const startSeason = (retireIds) => req('POST', '/seasons', { retire_ids: retireIds });

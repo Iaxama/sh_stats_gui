@@ -11,6 +11,7 @@ import {
   buildRoleStats,
   calculateEloRatings,
   calculateExpectedScore,
+  computeStats,
   INITIAL_ELO,
   sortGamesChronologically,
 } from './statistics.js';
@@ -141,4 +142,19 @@ test('local offline dataset has the expected supplied-data totals', { skip: !exi
     assert.equal(finalPoint[player.id], ratings[player.id]);
   }
   assert.ok(Math.abs(Object.values(ratings).reduce((sum, rating) => sum + rating, 0) - INITIAL_ELO * localPlayers.length) < 1e-9);
+});
+
+test('counts Dumbo and Dictator from the Hitler chooser role', () => {
+  const players = ['a', 'b', 'c', 'd', 'e'].map(id => ({ id, name: id }));
+  const roles = ['liberal', 'liberal', 'liberal', 'fascist', 'hitler'];
+  const make = chooser => ({
+    id: chooser, date: '2026-01-01', winning_team: 'fascist', winning_condition: 'hitler_elected',
+    hitler_chooser_id: chooser,
+    players: players.map((p, i) => ({ player_id: p.id, role: roles[i], died: false })),
+  });
+  const { perPlayer } = computeStats([make('a'), make('d')], players);
+  const byId = Object.fromEntries(perPlayer.map(row => [row.player.id, row]));
+  assert.equal(byId.a.dumbo, 1);
+  assert.equal(byId.d.dictator, 1);
+  assert.equal(byId.a.dictator, 0);
 });

@@ -1,0 +1,7 @@
+.box { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin: 1.2rem 0; padding: 0.9rem 1.4rem; background: var(--surface); border: 1px solid var(--gold-dark); border-radius: 8px; }
+.label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.85rem; }
+.clock { display: flex; gap: 1rem; }
+.unit { display: flex; flex-direction: column; align-items: center; min-width: 3.5rem; }
+.unit strong { color: var(--gold); font-size: 1.9rem; font-variant-numeric: tabular-nums; }
+.unit span { color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; }
+.link { color: var(--gold); }

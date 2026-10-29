@@ -51,14 +51,31 @@ def create_game():
     elif sniper_id:
         return jsonify({"error": "A sniper can only be recorded when Hitler is executed."}), 400
 
+    chooser_id = data.get("hitler_chooser_id")
+    hitler_was_elected = (
+        data.get("winning_team") == "fascist"
+        and data.get("winning_condition") == "hitler_elected"
+    )
+    if hitler_was_elected:
+        roles = {p["player_id"]: p["role"] for p in data.get("players", [])}
+        if not chooser_id:
+            return jsonify({"error": "Select the player who elected Hitler."}), 400
+        if chooser_id not in roles or roles[chooser_id] == "hitler":
+            return jsonify({"error": "The chooser must be a participating player other than Hitler."}), 400
+    elif chooser_id:
+        return jsonify({"error": "A Hitler chooser can only be recorded when Hitler is elected."}), 400
+
     game = Game(
         players=[PlayerResult.from_dict(p) for p in data["players"]],
         winning_team=data["winning_team"],
         winning_condition=data["winning_condition"],
         date=data.get("date", datetime.now(timezone.utc).isoformat()),
         sniper_id=sniper_id,
+        hitler_chooser_id=chooser_id,
     )
     with _lock:
+        seasons = storage.ensure_seasons()
+        game.season_id = next((s for s in seasons if s.end_date is None), seasons[-1]).id
         games = storage.load_games()
         games.append(game)
         try:

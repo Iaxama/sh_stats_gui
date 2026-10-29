@@ -1,0 +1,5 @@
+.wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem; margin: 0.8rem 0 1.2rem; }
+.toggle { display: inline-flex; border: 1px solid var(--gold-dark); border-radius: 6px; overflow: hidden; }
+.toggle button { border: 0; border-radius: 0; background: var(--surface2); color: var(--text); padding: 0.45rem 1rem; }
+.toggle button.active { background: var(--gold-dark); color: #15120d; font-weight: bold; }
+.retired { font-size: 0.85rem; }
