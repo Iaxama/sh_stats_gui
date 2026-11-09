@@ -5,6 +5,7 @@ import tempfile
 
 import pytest
 
+from backend.awards import AWARD_RULES
 import storage
 
 
@@ -41,7 +42,8 @@ def test_season_lifecycle(client):
     assert seasons[0]["end_date"] and seasons[1]["end_date"] is None
     keys = {a["key"]: a for a in seasons[0]["awards"]}
     assert keys["most_dumbo"]["winners"] == [ids[0]]
-    assert "highest_elo" not in keys  # below 5 games
+    assert not {"least_games", "highest_elo", "lowest_elo"} & keys.keys()
+    assert not {"least_games", "highest_elo", "lowest_elo"} & {key for key, *_ in AWARD_RULES}
     retired = [p["id"] for p in client.get("/api/players").get_json() if p["retired"]]
     assert retired == [ids[1]]
     g2 = client.post("/api/games", json=_game(ids, win="liberal", cond="policies_enacted")).get_json()

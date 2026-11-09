@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { calculateGamePercentage } from '../utils/statistics';
 import Avatar from './Avatar';
 import styles from './PlayerHover.module.css';
 
@@ -47,13 +48,14 @@ export function getPlayerStats(playerId, games) {
   }
 
   const rate = (won, total) => total ? Math.round(won / total * 100) : 0;
+  const gameRate = count => calculateGamePercentage(count, played);
   return {
     played, wins, losses, deaths, snipers, dumbo, dictator, liberal, fascist, hitler,
     liberalWins, fascistWins, hitlerWins,
+    winsGameRate: gameRate(wins),
+    liberalGameRate: gameRate(liberal),
+    fascistGameRate: gameRate(fascist),
     winRate: rate(wins, played),
-    liberalWinRate: rate(liberalWins, liberal),
-    fascistWinRate: rate(fascistWins, fascist),
-    hitlerWinRate: rate(hitlerWins, hitler),
   };
 }
 
@@ -85,9 +87,9 @@ export default function PlayerHover({ player, games = [], children }) {
           <Avatar path={player.avatar_path} name={player.name} size={80} />
           <strong className={styles.name}>{player.name}</strong>
           <div className={styles.stats}>
-            <div><strong>{stats.liberal}</strong><span>Liberal</span></div>
-            <div><strong>{stats.fascist}</strong><span>Fascist</span></div>
-            <div><strong>{stats.winRate}%</strong><span>Win rate</span></div>
+            <div><strong>{stats.liberal} ({stats.liberalGameRate}%)</strong><span>Liberal</span></div>
+            <div><strong>{stats.fascist} ({stats.fascistGameRate}%)</strong><span>Fascist</span></div>
+            <div><strong>{stats.wins} ({stats.winsGameRate}%)</strong><span>Wins</span></div>
           </div>
         </div>,
         document.body,

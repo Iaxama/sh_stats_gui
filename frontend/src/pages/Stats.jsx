@@ -4,26 +4,29 @@ import Avatar from '../components/Avatar';
 import PlayerHover from '../components/PlayerHover';
 import ScopeToggle from '../components/ScopeToggle';
 import useScope, { applyScope } from '../hooks/useScope';
-import { calculateEloRatings, computeStats } from '../utils/statistics';
+import { calculateEloRatings, calculateGamePercentage, computeStats } from '../utils/statistics';
 import styles from './Stats.module.css';
 
 const COLS = [
   { key: 'name', label: 'Player' },
   { key: 'games', label: 'Games' },
-  { key: 'wins', label: 'Wins' },
-  { key: 'winPct', label: 'Win %' },
+  { key: 'wins', label: 'Wins', percentageSort: true },
   { key: 'elo', label: 'ELO' },
-  { key: 'deaths', label: 'Deaths' },
-  { key: 'snipers', label: 'Sniper' },
-  { key: 'dumbo', label: 'Dumbo' },
-  { key: 'dictator', label: 'Dictator' },
-  { key: 'libGames', label: 'Lib G' },
-  { key: 'libWins', label: 'Lib W' },
-  { key: 'fasGames', label: 'Fas G' },
-  { key: 'fasWins', label: 'Fas W' },
-  { key: 'hitGames', label: 'Hit G' },
-  { key: 'hitWins', label: 'Hit W' },
+  { key: 'deaths', label: 'Deaths', percentageSort: true },
+  { key: 'snipers', label: 'Sniper', percentageSort: true },
+  { key: 'dumbo', label: 'Dumbo', percentageSort: true },
+  { key: 'dictator', label: 'Dictator', percentageSort: true },
+  { key: 'libGames', label: 'Lib G', percentageSort: true },
+  { key: 'libWins', label: 'Lib W', percentageSort: true },
+  { key: 'fasGames', label: 'Fas G', percentageSort: true },
+  { key: 'fasWins', label: 'Fas W', percentageSort: true },
+  { key: 'hitGames', label: 'Hit G', percentageSort: true },
+  { key: 'hitWins', label: 'Hit W', percentageSort: true },
 ];
+
+function formatPlayerCount(count, gamesPlayed) {
+  return `${count} (${calculateGamePercentage(count, gamesPlayed)}%)`;
+}
 
 export default function Stats() {
   const [allGames, setGames] = useState([]);
@@ -32,6 +35,7 @@ export default function Stats() {
   const { scope, currentSeason, showRetired } = scopeState;
   const [sortKey, setSortKey] = useState('games');
   const [sortDir, setSortDir] = useState(-1);
+  const [minGames, setMinGames] = useState('0');
 
   useEffect(() => {
     Promise.all([getGames(), getPlayers()]).then(([g, p]) => { setGames(g); setPlayers(p); });
@@ -46,20 +50,33 @@ export default function Stats() {
 
   const rows = perPlayer.map(r => ({
     ...r,
-    winPct: r.games ? Math.round(r.wins / r.games * 100) : 0,
     elo: eloRatings[r.player.id],
     libGames: r.byRole.liberal.g, libWins: r.byRole.liberal.w,
     fasGames: r.byRole.fascist.g, fasWins: r.byRole.fascist.w,
     hitGames: r.byRole.hitler.g,  hitWins: r.byRole.hitler.w,
+    winsPercentage: calculateGamePercentage(r.wins, r.games),
+    deathsPercentage: calculateGamePercentage(r.deaths, r.games),
+    snipersPercentage: calculateGamePercentage(r.snipers, r.games),
+    dumboPercentage: calculateGamePercentage(r.dumbo, r.games),
+    dictatorPercentage: calculateGamePercentage(r.dictator, r.games),
+    libGamesPercentage: calculateGamePercentage(r.byRole.liberal.g, r.games),
+    libWinsPercentage: calculateGamePercentage(r.byRole.liberal.w, r.games),
+    fasGamesPercentage: calculateGamePercentage(r.byRole.fascist.g, r.games),
+    fasWinsPercentage: calculateGamePercentage(r.byRole.fascist.w, r.games),
+    hitGamesPercentage: calculateGamePercentage(r.byRole.hitler.g, r.games),
+    hitWinsPercentage: calculateGamePercentage(r.byRole.hitler.w, r.games),
   })).sort((a, b) => {
     const av = sortKey === 'name' ? a.player.name : a[sortKey];
     const bv = sortKey === 'name' ? b.player.name : b[sortKey];
     return typeof av === 'string' ? av.localeCompare(bv) * sortDir : (av - bv) * sortDir;
   });
+  const minimumGames = Math.max(0, Number.parseInt(minGames, 10) || 0);
+  const visibleRows = rows.filter(row => row.games >= minimumGames);
 
-  function handleSort(key) {
-    if (sortKey === key) setSortDir(d => -d);
-    else { setSortKey(key); setSortDir(-1); }
+  function handleSort(key, metric = 'count') {
+    const sortField = metric === 'percentage' ? `${key}Percentage` : key;
+    if (sortKey === sortField) setSortDir(d => -d);
+    else { setSortKey(sortField); setSortDir(-1); }
   }
 
   return (
@@ -83,19 +100,71 @@ export default function Stats() {
         ))}
       </div>
 
+      <div className={styles.filterControls}>
+        <label htmlFor="minimum-games">Minimum games played</label>
+        <input
+          id="minimum-games"
+          type="number"
+          min="0"
+          step="1"
+          value={minGames}
+          onChange={event => setMinGames(event.target.value)}
+          aria-describedby="minimum-games-help"
+        />
+        <span id="minimum-games-help">Players with fewer games are hidden.</span>
+      </div>
+
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
-              {COLS.map(c => (
-                <th key={c.key} onClick={() => handleSort(c.key)} className={sortKey === c.key ? styles.sorted : ''}>
-                  {c.label} {sortKey === c.key ? (sortDir === -1 ? '▼' : '▲') : ''}
-                </th>
-              ))}
+              {COLS.map(c => {
+                const countActive = sortKey === c.key;
+                const percentageKey = `${c.key}Percentage`;
+                const percentageActive = sortKey === percentageKey;
+                return (
+                  <th key={c.key} className={countActive || percentageActive ? styles.sorted : ''}>
+                    {c.percentageSort ? (
+                      <span className={styles.sortHeader}>
+                        {c.label}
+                        <span className={styles.sortButtons}>
+                          <button
+                            type="button"
+                            aria-label={`Sort ${c.label} by count`}
+                            aria-pressed={countActive}
+                            className={countActive ? styles.activeSort : ''}
+                            onClick={() => handleSort(c.key)}
+                          >
+                            #{countActive ? (sortDir === -1 ? ' ▼' : ' ▲') : ''}
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Sort ${c.label} by percentage`}
+                            aria-pressed={percentageActive}
+                            className={percentageActive ? styles.activeSort : ''}
+                            onClick={() => handleSort(c.key, 'percentage')}
+                          >
+                            %{percentageActive ? (sortDir === -1 ? ' ▼' : ' ▲') : ''}
+                          </button>
+                        </span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        aria-label={`Sort by ${c.label}`}
+                        className={styles.headerSort}
+                        onClick={() => handleSort(c.key)}
+                      >
+                        {c.label} {countActive ? (sortDir === -1 ? '▼' : '▲') : ''}
+                      </button>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {rows.map(r => (
+            {visibleRows.map(r => (
               <tr key={r.player.id}>
                 <td>
                   <div className={styles.playerCell}>
@@ -106,16 +175,18 @@ export default function Stats() {
                   </div>
                 </td>
                 <td>{r.games}</td>
-                <td>{r.wins}</td>
-                <td>{r.winPct}%</td>
+                <td>{formatPlayerCount(r.wins, r.games)}</td>
                 <td>{Math.round(r.elo)}</td>
-                <td>{r.deaths}</td>
-                <td>{r.snipers}</td>
-                <td>{r.dumbo}</td>
-                <td>{r.dictator}</td>
-                <td>{r.libGames}</td><td>{r.libWins}</td>
-                <td>{r.fasGames}</td><td>{r.fasWins}</td>
-                <td>{r.hitGames}</td><td>{r.hitWins}</td>
+                <td>{formatPlayerCount(r.deaths, r.games)}</td>
+                <td>{formatPlayerCount(r.snipers, r.games)}</td>
+                <td>{formatPlayerCount(r.dumbo, r.games)}</td>
+                <td>{formatPlayerCount(r.dictator, r.games)}</td>
+                <td>{formatPlayerCount(r.libGames, r.games)}</td>
+                <td>{formatPlayerCount(r.libWins, r.games)}</td>
+                <td>{formatPlayerCount(r.fasGames, r.games)}</td>
+                <td>{formatPlayerCount(r.fasWins, r.games)}</td>
+                <td>{formatPlayerCount(r.hitGames, r.games)}</td>
+                <td>{formatPlayerCount(r.hitWins, r.games)}</td>
               </tr>
             ))}
           </tbody>

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { getGames, getPlayers } from '../api';
 import Avatar from '../components/Avatar';
 import { getPlayerStats } from '../components/PlayerHover';
+import { calculateGamePercentage } from '../utils/statistics';
 import styles from './PlayerProfile.module.css';
 
 function avatarUrl(path) {
@@ -27,17 +28,21 @@ export default function PlayerProfile() {
   }
 
   const stats = getPlayerStats(player.id, games);
+  const formatCount = count => `${count} (${calculateGamePercentage(count, stats.played)}%)`;
   const profileRows = [
     ['Games played', stats.played],
-    ['Wins', stats.wins],
-    ['Losses', stats.losses],
-    ['Deaths', stats.deaths],
-    ['Sniper', stats.snipers],
-    ['Dumbo', stats.dumbo],
-    ['Dictator', stats.dictator],
-    ['As Liberal', `${stats.liberal} (${stats.liberalWinRate}%)`],
-    ['As Fascist', `${stats.fascist} (${stats.fascistWinRate}%)`],
-    ['As Hitler', `${stats.hitler} (${stats.hitlerWinRate}%)`],
+    ['Wins', formatCount(stats.wins)],
+    ['Losses', formatCount(stats.losses)],
+    ['Deaths', formatCount(stats.deaths)],
+    ['Sniper', formatCount(stats.snipers)],
+    ['Dumbo', formatCount(stats.dumbo)],
+    ['Dictator', formatCount(stats.dictator)],
+    ['As Liberal', formatCount(stats.liberal)],
+    ['Liberal wins', formatCount(stats.liberalWins)],
+    ['As Fascist', formatCount(stats.fascist)],
+    ['Fascist wins', formatCount(stats.fascistWins)],
+    ['As Hitler', formatCount(stats.hitler)],
+    ['Hitler wins', formatCount(stats.hitlerWins)],
     ['Win rate', `${stats.winRate}%`],
   ];
 

@@ -16,6 +16,10 @@ export function calculateExpectedScore(rating, opponentRating) {
   return 1 / (1 + 10 ** ((opponentRating - rating) / ELO_SCALE));
 }
 
+export function calculateGamePercentage(count, gamesPlayed) {
+  return gamesPlayed ? Math.round(count / gamesPlayed * 100) : 0;
+}
+
 export function sortGamesChronologically(games) {
   return games
     .map((game, index) => ({ game, index, time: Date.parse(game.date) }))

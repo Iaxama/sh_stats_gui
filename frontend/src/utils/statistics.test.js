@@ -11,6 +11,7 @@ import {
   buildRoleStats,
   calculateEloRatings,
   calculateExpectedScore,
+  calculateGamePercentage,
   computeStats,
   INITIAL_ELO,
   sortGamesChronologically,
@@ -53,6 +54,11 @@ test('sortGamesChronologically sorts by time and breaks timestamp ties by id', (
   assert.deepEqual(sortGamesChronologically(games).map(item => item.id), ['a-tie', 'b-tie', 'later']);
 });
 
+test('calculateGamePercentage uses total games and safely handles zero games', () => {
+  assert.equal(calculateGamePercentage(2, 3), 67);
+  assert.equal(calculateGamePercentage(0, 0), 0);
+});
+
 test('buildCumulativeWins retains every game and accumulates both teams', () => {
   const points = buildCumulativeWins(games);
   assert.deepEqual(points.map(({ liberal, fascist }) => [liberal, fascist]), [[0, 1], [1, 1], [1, 2]]);
@@ -85,6 +91,7 @@ test('role statistics keep Hitler separate and ignore unknown players', () => {
   const bruno = rows.find(row => row.playerId === 'b');
   const carla = rows.find(row => row.playerId === 'c');
 
+  assert.equal(ada.totalGames, 2);
   assert.deepEqual(ada.liberal, { games: 1, wins: 1 });
   assert.deepEqual(ada.fascist, { games: 1, wins: 1 });
   assert.deepEqual(bruno.hitler, { games: 1, wins: 0 });

@@ -3,11 +3,23 @@
 .statBox { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 0.8rem; text-align: center; display: flex; flex-direction: column; gap: 0.3rem; }
 .statVal { font-size: 2rem; color: var(--gold); font-weight: bold; }
 .statLabel { font-size: 0.8rem; color: var(--text-dim); }
+.filterControls { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 0.75rem; }
+.filterControls label { font-weight: 600; }
+.filterControls input { width: 5rem; padding: 0.35rem 0.45rem; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; font: inherit; }
+.filterControls span { color: var(--text-dim); font-size: 0.85rem; }
 .tableWrap { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
 .table { width: 100%; min-width: 930px; border-collapse: collapse; font-size: 0.9rem; }
-.table th { background: var(--surface2); color: var(--text-dim); text-align: left; padding: 0.5rem 0.6rem; cursor: pointer; white-space: nowrap; border-bottom: 1px solid var(--border); user-select: none; }
+.table th { background: var(--surface2); color: var(--text-dim); text-align: left; padding: 0.5rem 0.6rem; white-space: nowrap; border-bottom: 1px solid var(--border); user-select: none; }
 .table th.sorted { color: var(--gold); }
 .table th:hover { color: var(--gold); }
+.sortHeader { display: flex; align-items: center; gap: 0.4rem; }
+.sortButtons { display: inline-flex; gap: 0.15rem; }
+.sortButtons button,
+.headerSort { border: 0; padding: 0; color: inherit; background: transparent; font: inherit; cursor: pointer; }
+.sortButtons button { font-size: 0.75rem; }
+.sortButtons button:hover,
+.sortButtons button.activeSort { color: var(--gold); }
+.headerSort { text-align: left; }
 .table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
 .table tr:hover td { background: var(--surface); }
 .playerCell { display: flex; align-items: center; gap: 0.5rem; }

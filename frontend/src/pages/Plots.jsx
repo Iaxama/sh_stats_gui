@@ -17,7 +17,7 @@ import {
 import { getGames, getPlayers } from '../api';
 import ScopeToggle from '../components/ScopeToggle';
 import useScope, { applyScope } from '../hooks/useScope';
-import { buildPlotData } from '../utils/statistics';
+import { buildPlotData, calculateGamePercentage } from '../utils/statistics';
 import styles from './Plots.module.css';
 
 const COLORS = {
@@ -111,10 +111,9 @@ function RoleTooltip({ active, payload }) {
       <strong>{row.playerName}</strong>
       {Object.entries(ROLE_META).map(([role, meta]) => {
         const { games, wins } = row[role];
-        const percentage = games ? Math.round(wins / games * 100) : 0;
         return (
           <span key={role} style={{ color: meta.light }}>
-            {meta.label}: {wins}/{games} wins ({percentage}%)
+            {meta.label}: {games} games ({calculateGamePercentage(games, row.totalGames)}%); {wins} wins ({calculateGamePercentage(wins, row.totalGames)}% of games)
           </span>
         );
       })}

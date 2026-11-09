@@ -1,24 +1,17 @@
 from __future__ import annotations
 import math
-from datetime import datetime
-from typing import Dict, Iterable, List
+from typing import Dict, List
 
 from models.game import Game
 
-INITIAL_ELO = 1500
-ELO_SCALE = 400
-ELO_K_FACTOR = 64
 MIN_GAMES_FOR_RATE_AWARDS = 5
 
 # (key, stat, direction, needs_min_games). Titles/descriptions live in the frontend.
 AWARD_RULES = [
     ("most_games", "games", "max", False),
-    ("least_games", "games", "min", False),
     ("most_wins", "wins", "max", False),
     ("highest_win_pct", "win_pct", "max", True),
     ("lowest_win_pct", "win_pct", "min", True),
-    ("highest_elo", "elo", "max", True),
-    ("lowest_elo", "elo", "min", True),
     ("most_deaths", "deaths", "max", False),
     ("most_snipes", "snipes", "max", False),
     ("most_liberal_games", "lib_games", "max", False),
@@ -32,48 +25,10 @@ AWARD_RULES = [
 ]
 
 
-def _sort_key(game: Game, index: int):
-    try:
-        t = datetime.fromisoformat(game.date.replace("Z", "+00:00")).timestamp()
-    except (ValueError, AttributeError):
-        t = math.inf
-    return (t, game.id or "", index)
-
-
 def _won(role: str, winning_team: str) -> bool:
     return (role == "liberal" and winning_team == "liberal") or (
         role in ("fascist", "hitler") and winning_team == "fascist"
     )
-
-
-def compute_elo(games: Iterable[Game]) -> Dict[str, float]:
-    ordered = [g for _, g in sorted(((_sort_key(g, i), g) for i, g in enumerate(games)), key=lambda x: x[0])]
-    ratings: Dict[str, float] = {}
-    for game in ordered:
-        lib, fas, seen = [], [], set()
-        for r in game.players:
-            if r.player_id in seen:
-                continue
-            if r.role == "liberal":
-                lib.append(r.player_id)
-            elif r.role in ("fascist", "hitler"):
-                fas.append(r.player_id)
-            else:
-                continue
-            seen.add(r.player_id)
-            ratings.setdefault(r.player_id, INITIAL_ELO)
-        if not lib or not fas or game.winning_team not in ("liberal", "fascist"):
-            continue
-        lib_r = sum(ratings[p] for p in lib) / len(lib)
-        fas_r = sum(ratings[p] for p in fas) / len(fas)
-        expected = 1 / (1 + 10 ** ((fas_r - lib_r) / ELO_SCALE))
-        surprise = (1 if game.winning_team == "liberal" else 0) - expected
-        n = len(lib) + len(fas)
-        for p in lib:
-            ratings[p] += ELO_K_FACTOR * surprise * len(fas) / n
-        for p in fas:
-            ratings[p] -= ELO_K_FACTOR * surprise * len(lib) / n
-    return ratings
 
 
 def compute_player_stats(games: List[Game]) -> Dict[str, dict]:
@@ -106,10 +61,8 @@ def compute_player_stats(games: List[Game]) -> Dict[str, dict]:
                 s[f"{prefix}_games"] += 1
                 s[f"{prefix}_wins"] += won
 
-    elo = compute_elo(games)
     for pid, s in stats.items():
         s["win_pct"] = s["wins"] / s["games"] * 100 if s["games"] else 0
-        s["elo"] = elo.get(pid, INITIAL_ELO)
     return stats
 
 
