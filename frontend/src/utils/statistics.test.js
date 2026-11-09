@@ -64,6 +64,46 @@ test('buildCumulativeWins retains every game and accumulates both teams', () => 
   assert.deepEqual(points.map(({ liberal, fascist }) => [liberal, fascist]), [[0, 1], [1, 1], [1, 2]]);
 });
 
+test('Election Pool uses cumulative results after five games in chronological order', () => {
+  const moreGames = [
+    game('fifth', '2026-01-05T12:00:00Z', 'liberal', []),
+    game('fourth', '2026-01-04T12:00:00Z', 'fascist', []),
+    game('sixth', '2026-01-06T12:00:00Z', 'liberal', []),
+    ...games,
+  ];
+  const points = buildPlotData(moreGames, players).electionPoll;
+
+  assert.deepEqual(points.map(point => point.gameId), ['fifth', 'sixth']);
+  assert.deepEqual(points.map(point => point.gameNumber), [5, 6]);
+  assert.deepEqual(points.map(point => [point.liberal, point.fascist]), [
+    [40, 60],
+    [50, 50],
+  ]);
+  for (const point of points) {
+    assert.ok(Math.abs(point.liberal + point.fascist - 100) < 1e-10);
+  }
+  assert.equal(points[0].date, '2026-01-05T12:00:00Z');
+  assert.equal(points[0].time, Date.parse(points[0].date));
+});
+
+test('Election Pool waits for five games and excludes unrecognized winners from cumulative results', () => {
+  const fourGames = [...games, game('fourth', '2026-01-04', 'liberal', [])];
+  assert.deepEqual(buildPlotData(fourGames, players).electionPoll, []);
+  const invalid = game('invalid', '2026-01-03T12:00:00Z', 'unknown', []);
+  const laterGames = [
+    game('1', '2026-01-04', 'fascist', []),
+    game('2', '2026-01-05', 'fascist', []),
+    game('3', '2026-01-06', 'fascist', []),
+  ];
+  const points = buildPlotData([...games, invalid, ...laterGames], players).electionPoll;
+  assert.equal(points.length, 3);
+  assert.deepEqual(points.map(point => point.gameNumber), [5, 6, 7]);
+  assert.deepEqual([points[0].liberal, points[0].fascist], [25, 75]);
+  assert.deepEqual([points[1].liberal, points[1].fascist], [20, 80]);
+  assert.deepEqual([points[2].liberal, points[2].fascist], [100 / 6, 500 / 6]);
+  assert.ok(points.every(point => point.hasInvalidResults));
+});
+
 test('ELO history starts at 1500, uses team strength, and conserves rating points', () => {
   const history = buildEloHistory(games, players);
   assert.equal(history[0].a, undefined);
@@ -119,6 +159,7 @@ test('game-size buckets expose raw counts and ratios that sum to one', () => {
 test('empty inputs return empty plot datasets', () => {
   assert.deepEqual(buildPlotData([], []), {
     cumulativeWins: [],
+    electionPoll: [],
     eloHistory: [],
     roleStats: [],
     gameSizeStats: [],

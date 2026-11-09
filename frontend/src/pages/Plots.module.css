@@ -55,6 +55,32 @@
   padding-top: 0.8rem;
 }
 
+.chartMessage {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  padding: 1rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.pollChart {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.pollPlot {
+  flex: 1;
+  min-height: 0;
+}
+
+.chartWarning {
+  padding: 0 1rem;
+  color: #fca5a5;
+  font-size: 0.78rem;
+}
+
 .eloChart {
   height: 300px;
 }

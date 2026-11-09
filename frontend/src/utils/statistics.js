@@ -1,5 +1,6 @@
 export const INITIAL_ELO = 1500;
 export const ELO_SCALE = 400;
+export const ELECTION_POLL_MIN_GAMES = 5;
 
 // This is a team-level K factor. It is split between the two teams according
 // to their sizes, so the total rating gained always equals the total lost.
@@ -107,6 +108,23 @@ export function buildCumulativeWins(games) {
       time: Date.parse(game.date),
       liberal,
       fascist,
+    };
+  });
+}
+
+function buildElectionPoll(cumulativeWins) {
+  return cumulativeWins.slice(ELECTION_POLL_MIN_GAMES - 1).map(point => {
+    const totalWins = point.liberal + point.fascist;
+    const valid = totalWins > 0;
+
+    return {
+      gameId: point.gameId,
+      gameNumber: point.gameNumber,
+      date: point.date,
+      time: point.time,
+      liberal: valid ? point.liberal * 100 / totalWins : null,
+      fascist: valid ? point.fascist * 100 / totalWins : null,
+      hasInvalidResults: totalWins < point.gameNumber,
     };
   });
 }
@@ -225,8 +243,10 @@ export function buildGameSizeStats(games) {
 }
 
 export function buildPlotData(games, players) {
+  const cumulativeWins = buildCumulativeWins(games);
   return {
-    cumulativeWins: buildCumulativeWins(games),
+    cumulativeWins,
+    electionPoll: buildElectionPoll(cumulativeWins),
     eloHistory: buildEloHistory(games, players),
     roleStats: buildRoleStats(games, players),
     gameSizeStats: buildGameSizeStats(games),

@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -17,7 +19,7 @@ import {
 import { getGames, getPlayers } from '../api';
 import ScopeToggle from '../components/ScopeToggle';
 import useScope, { applyScope } from '../hooks/useScope';
-import { buildPlotData, calculateGamePercentage } from '../utils/statistics';
+import { buildPlotData, calculateGamePercentage, ELECTION_POLL_MIN_GAMES } from '../utils/statistics';
 import styles from './Plots.module.css';
 
 const COLORS = {
@@ -73,6 +75,23 @@ function ChartTooltip({ active, payload, mode = 'number' }) {
       {payload.map(entry => (
         <span key={entry.dataKey} style={{ color: entry.color }}>
           {entry.name}: {mode === 'elo' ? entry.value.toFixed(1) : entry.value}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ElectionPollTooltip({ active, payload }) {
+  if (!active || !payload?.length) return null;
+  const point = payload[0].payload;
+
+  return (
+    <div className={styles.tooltip}>
+      <strong>{formatExactDate(point.date)}</strong>
+      <span>Game {point.gameNumber} · all results to date</span>
+      {payload.map(entry => (
+        <span key={entry.dataKey} style={{ color: entry.color }}>
+          {entry.name}: {entry.value.toFixed(1)}%
         </span>
       ))}
     </div>
@@ -228,6 +247,7 @@ export default function Plots() {
   }
 
   const roleChartWidth = Math.max(900, plotData.roleStats.length * 96);
+  const pollHasSinglePoint = plotData.electionPoll.filter(point => point.liberal !== null).length === 1;
 
   return (
     <main className={styles.page}>
@@ -262,25 +282,36 @@ export default function Plots() {
 
       <ChartCard
         title="Election Pool"
-        description="Test copy of the win race: cumulative Liberal vs Fascist wins after each game."
+        description={`Cumulative share of wins, starting with game ${ELECTION_POLL_MIN_GAMES}.`}
       >
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={plotData.cumulativeWins} margin={{ top: 12, right: 24, bottom: 12, left: 0 }}>
-            <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="time"
-              type="number"
-              domain={['dataMin', 'dataMax']}
-              tickFormatter={formatShortDate}
-              stroke={COLORS.text}
-            />
-            <YAxis allowDecimals={false} stroke={COLORS.text} width={42} />
-            <Tooltip content={<ChartTooltip />} />
-            <Legend formatter={renderLegendLabel} />
-            <Line type="stepAfter" dataKey="liberal" name="Liberal" stroke={COLORS.liberal} strokeWidth={3} dot={false} isAnimationActive={false} />
-            <Line type="stepAfter" dataKey="fascist" name="Fascist" stroke={COLORS.fascistLight} strokeWidth={3} dot={false} isAnimationActive={false} />
-          </LineChart>
-        </ResponsiveContainer>
+        {plotData.electionPoll.length === 0 ? (
+          <div className={styles.chartMessage}>At least {ELECTION_POLL_MIN_GAMES} games are needed to show the Election Pool.</div>
+        ) : (
+          <div className={styles.pollChart}>
+            {plotData.electionPoll.some(point => point.hasInvalidResults) && (
+              <p className={styles.chartWarning}>Games with an unrecognized winning team are excluded from the cumulative results.</p>
+            )}
+            <div className={styles.pollPlot}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={plotData.electionPoll} margin={{ top: 12, right: 24, bottom: 12, left: 0 }}>
+                  <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="time"
+                    type="number"
+                    domain={['dataMin', 'dataMax']}
+                    tickFormatter={formatShortDate}
+                    stroke={COLORS.text}
+                  />
+                  <YAxis domain={[0, 100]} tickFormatter={value => `${value}%`} stroke={COLORS.text} width={48} />
+                  <Tooltip content={<ElectionPollTooltip />} />
+                  <Legend formatter={renderLegendLabel} />
+                  <Area type="stepAfter" dataKey="liberal" name="Liberal" stackId="wins" stroke={COLORS.liberal} fill={COLORS.liberal} fillOpacity={0.75} dot={pollHasSinglePoint} isAnimationActive={false} />
+                  <Area type="stepAfter" dataKey="fascist" name="Fascist" stackId="wins" stroke={COLORS.fascistLight} fill={COLORS.fascistLight} fillOpacity={0.75} dot={pollHasSinglePoint} isAnimationActive={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
       </ChartCard>
 
       <ChartCard
